@@ -53851,7 +53851,7 @@ class Car{
     const M=MODELS[this.model]||MODELS.baroudeur;Object.assign(this,{wb:M.wb,tr:M.tr,wr:M.wr,lift:M.lift,k:M.k,travel:M.travel,sag:G/(4*M.k),dmp:D_S*Math.sqrt(M.k/24)});
     this.M=[[this.tr,this.wb],[-this.tr,this.wb],[this.tr,-this.wb],[-this.tr,-this.wb]];
     const root=new THREE.Group(),tilt=new THREE.Group();tilt.position.y=0.9+this.lift;root.add(tilt);
-    const axle=new THREE.Group();root.add(axle);this.axle=axle;   // roues + amortisseurs : penchent avec la caisse
+    const axle=new THREE.Group();axle.position.y=tilt.position.y;root.add(axle);this.axle=axle;   // roues + amortisseurs : penchent avec la caisse
     const main=lamb(this.color);this.mainM=main;const dark=lamb(0x2b2d36),grey=lamb(0x8d93a0);
     const glass=new THREE.MeshLambertMaterial({color:0xa8dcff,transparent:true,opacity:0.25,depthWrite:false});
     const lighter=lamb(new THREE.Color(this.color).lerp(new THREE.Color(0xffffff),0.25).getHex());
@@ -53898,7 +53898,7 @@ class Car{
     const rodGeo=new THREE.CylinderGeometry(0.025,0.025,1,6);rodGeo.translate(0,0.5,0);
     const coilM=lamb(0xffc21a,{emissive:0x553300,emissiveIntensity:0.3}),dampM=lamb(0x30333d),rodM=lamb(0xe8ecf2);
     this.M.forEach(([x,z],wi)=>{
-      const st=new THREE.Group();st.position.set(x,this.wr,z);const sp2=new THREE.Group();st.add(sp2);
+      const st=new THREE.Group();st.position.set(x,this.wr-tilt.position.y,z);const sp2=new THREE.Group();st.add(sp2);
       const t=new THREE.Mesh(tire,tireM);t.castShadow=true;sp2.add(t);sp2.add(new THREE.Mesh(rim,this.rimM));
       for(let k=0;k<4;k++){const lug=new THREE.Mesh(new THREE.BoxGeometry(0.5*Math.max(1,this.wr/0.55),this.wr*0.18,this.wr*0.4),tireM);lug.rotation.x=k*Math.PI/4;sp2.add(lug);}
       axle.add(st);
@@ -54028,10 +54028,10 @@ class Car{
       const wr=this.wr*sc*w.base;
       let y=ym+this.wr-this.sag+clamp(this.wheelH[i]+this.sag-(this.pos.y+ym),0,this.travel+0.28);
       y=Math.max(y,this.wheelH[i]-this.pos.y+wr);
-      w.st.position.y=y-ym;   // repère des roues penché comme la caisse
+      const ay=this.axle.position.y;w.st.position.y=y-ym-ay;   // même pivot que la caisse : la roue ne fait que monter/descendre
       // amortisseur : du moyeu jusqu'au châssis
-      _sa.set(w.x*0.8,1.18-0.9-(this.lift-0.22)*0.3+this.tilt.position.y,w.z);
-      _sb.set(w.x*0.8,y-ym+0.05,w.z);
+      _sa.set(w.x*0.8,1.18-0.9-(this.lift-0.22)*0.3,w.z);
+      _sb.set(w.x*0.8,y-ym-ay+0.05,w.z);
       const len=Math.max(0.15,_sa.distanceTo(_sb));_sd.subVectors(_sa,_sb).normalize();
       w.shock.position.copy(_sb);w.shock.quaternion.setFromUnitVectors(_UP,_sd);
       w.coil.scale.set(1,len*0.85,1);w.coil.position.y=len*0.08;
