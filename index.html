@@ -84,14 +84,15 @@ kbd{display:inline-block;min-width:22px;text-align:center;padding:1px 6px;margin
 #rMusic{opacity:.55}#rMusic.on{opacity:1}
 .lv{font-size:12px;font-weight:800;margin-top:6px;opacity:.85}.lv i{display:block;height:8px;border:2px solid var(--ink);border-radius:6px;margin-top:3px;background:linear-gradient(90deg,#ffd23f var(--p),#fff var(--p))}
 #radio[hidden]{display:none}
-#toasts{position:fixed;top:64px;left:50%;transform:translateX(-50%);z-index:6;display:flex;flex-direction:column;align-items:center;gap:6px;pointer-events:none}
+#toasts{position:fixed;top:calc(118px + var(--lobH,0px));left:50%;transform:translateX(-50%);z-index:6;display:flex;flex-direction:column;align-items:center;gap:6px;pointer-events:none}
 .toast{background:var(--paper);border:3px solid var(--ink);border-radius:14px;padding:6px 14px;font-weight:800;box-shadow:0 4px 0 var(--ink);animation:pop .25s ease-out}
 @keyframes pop{from{transform:scale(.6);opacity:0}to{transform:scale(1);opacity:1}}
-#lobby{position:fixed;bottom:14px;left:50%;transform:translateX(-50%);z-index:5;padding:8px 14px;font-weight:800;display:flex;gap:10px;align-items:center}
+#lobby{position:fixed;top:62px;left:50%;transform:translateX(-50%);z-index:8;padding:8px 14px;font-weight:800;display:flex;gap:10px;align-items:center;white-space:nowrap;max-width:96vw;flex-wrap:wrap;justify-content:center}
+#lobby .code{font-size:28px;font-weight:900;letter-spacing:6px;background:#ffd23f;border:3px solid var(--ink);border-radius:12px;padding:0 10px}
 #lobby button{font:inherit;font-weight:800;border:3px solid var(--ink);border-radius:12px;background:#ffd23f;padding:4px 10px;cursor:pointer}
 #pauseBtn{position:fixed;top:10px;right:10px;z-index:5;font:inherit;font-weight:900;font-size:18px;width:42px;height:42px;border-radius:50%;border:3px solid var(--ink);background:var(--paper);box-shadow:0 4px 0 var(--ink);cursor:pointer}
-#pauseBtn[hidden],#mapBtn[hidden],#campBar[hidden],#bigmap[hidden],#bSleep[hidden]{display:none}
-#tuto{position:fixed;left:50%;top:70px;transform:translateX(-50%);z-index:7;width:min(560px,92vw);padding:10px 14px}#tuto[hidden],#touch[hidden]{display:none}
+#pauseBtn[hidden],#mapBtn[hidden],#campBar[hidden],#bigmap[hidden],#bSleep[hidden],#pCode[hidden]{display:none}
+#tuto{position:fixed;left:50%;top:calc(62px + var(--lobH,0px));transform:translateX(-50%);z-index:7;width:min(560px,92vw);padding:10px 14px}#tuto[hidden],#touch[hidden]{display:none}
 .trow{display:flex;gap:8px;align-items:center}.trow b{background:#ff8a3d;color:#fff;border:2px solid var(--ink);border-radius:8px;padding:1px 8px}.treco{font-size:12px;font-weight:800;opacity:.7;flex:1}
 #tutoSkip{font:inherit;font-weight:800;font-size:12px;border:2px solid var(--ink);border-radius:9px;background:#fff;padding:3px 8px;cursor:pointer}
 #tutoTxt{font-weight:800;font-size:17px;margin:8px 0}.tbar{height:8px;border:2px solid var(--ink);border-radius:6px;background:#fff;overflow:hidden}.tbar i{display:block;height:100%;background:#80ed99;transition:width .3s}
@@ -244,6 +245,7 @@ kbd{display:inline-block;min-width:22px;text-align:center;padding:1px 6px;margin
  <div class="box panel">
   <h1 style="font-size:46px">PAUSE</h1>
   <div class="row">🔊 Volume général <input id="mVol" type="range" min="0" max="100" value="80"></div>
+  <div class="row" id="pCode" hidden>🌐 Code de la partie : <b id="pCodeV" style="font-size:22px;letter-spacing:4px"></b> <button class="big b4" id="pCopy" style="padding:4px 10px;font-size:14px">📋 Copier le lien</button></div>
   <div class="row" style="display:block">🚙 <b>Mes véhicules</b> <small style="opacity:.7">(achète-en d'autres au 🔧 garage près du départ)</small><div id="pGarage"></div></div>
   <div class="row">🎵 Musique <select id="mStation"></select> <input id="rVol" type="range" min="0" max="100" value="55"></div>
   <div class="row"><button class="big b4" id="bTuto" style="padding:6px 12px;font-size:15px">🎓 Revoir le tuto</button> <button class="big b4" id="bTime" style="padding:6px 12px;font-size:15px">⏰ Avancer l'heure</button></div>
@@ -54803,13 +54805,15 @@ const Net={peer:null,conn:null,host:false,code:'',connected:false,call:null,stre
 const ID_PREFIX='duopiste-v1-';
 function genCode(){const A='ABCDEFGHJKLMNPQRSTUVWXYZ23456789';let s='';for(let i=0;i<4;i++)s+=A[Math.floor(Math.random()*A.length)];return s;}
 function netSend(m){if(Net.connected&&Net.conn&&Net.conn.open){try{Net.conn.send(m);}catch(e){}}}
-function lobby(html){const l=document.getElementById('lobby');if(!html){l.hidden=true;return;}l.innerHTML=html;l.hidden=false;}
+function lobby(html){const l=document.getElementById('lobby');if(!html){l.hidden=true;}else{l.innerHTML=html;l.hidden=false;}
+  // le tuto et les messages se placent sous le bandeau du code
+  requestAnimationFrame(()=>document.documentElement.style.setProperty('--lobH',(l.hidden?0:l.offsetHeight+8)+'px'));}
 function netHost(){
   if(!window.Peer){toast('Le mode en ligne est indisponible ici 😕');return;}
   Net.host=true;Net.code=genCode();
   Net.peer=new Peer(ID_PREFIX+Net.code,{debug:0,config:ICE});
   Net.peer.on('open',()=>{
-    lobby(`🌐 Code de la partie : <span style="font-size:22px;letter-spacing:4px">${Net.code}</span> <button id="bInvite">Copier le lien</button><span style="opacity:.6">en attente du pote…</span>`);
+    lobby(`🌐 Code à donner à ton pote : <span class="code">${Net.code}</span> <button id="bInvite">📋 Copier le lien</button><span style="opacity:.6">en attente du pote…</span>`);
     cgCall(s=>{const u=s.game.inviteLink({room:Net.code});Net.inviteUrl=u;});
     cgCall(s=>s.game.showInviteButton({room:Net.code}));
     document.getElementById('bInvite').onclick=()=>{const u=Net.inviteUrl||(location.href.split('?')[0]+'?room='+Net.code);try{navigator.clipboard.writeText(u);toast('🔗 Lien copié !');}catch(e){toast(u);}};
@@ -55975,7 +55979,8 @@ function cleanup(){
   Winch.on=false;Race.active=false;raceFlag.visible=false;lobby(null);
 }
 function togglePause(){
-  if(!started)return;paused=!paused;if(paused)renderHelp();document.getElementById('pause').hidden=!paused;if(paused)refreshGarage();else document.getElementById('admin').hidden=true;cgGameplay(!paused);
+  if(!started)return;paused=!paused;if(paused)renderHelp();
+  if(paused){const pc=document.getElementById('pCode');pc.hidden=!Net.code||!Net.peer;document.getElementById('pCodeV').textContent=Net.code||'';}document.getElementById('pause').hidden=!paused;if(paused)refreshGarage();else document.getElementById('admin').hidden=true;cgGameplay(!paused);
   if(AC){if(paused)radioBus.gain.setTargetAtTime(Radio.vol*0.2,AC.currentTime,0.1);else radioBus.gain.setTargetAtTime(Radio.vol*0.55,AC.currentTime,0.1);}
 }
 function askNick(m){
@@ -55996,6 +56001,7 @@ document.getElementById('bSolo').onclick=()=>askNick('solo');
 document.getElementById('bHost').onclick=()=>askNick('host');
 document.getElementById('bJoin').onclick=()=>{const v=document.getElementById('jCode').value.trim();if(v.length!==4){toast('Entre le code à 4 caractères de ton pote');return;}askNick('join');};
 document.getElementById('bResume').onclick=()=>togglePause();
+document.getElementById('pCopy').onclick=()=>{const u=Net.inviteUrl||(location.href.split('?')[0]+'?room='+Net.code);try{navigator.clipboard.writeText(u);toast('🔗 Lien copié !');}catch(e){toast(u);}};
 document.getElementById('tutoSkip').onclick=()=>endTuto(false);
 setupTouch();
 document.getElementById('ce1').onclick=()=>openCharEditor(1);document.getElementById('ce2').onclick=()=>openCharEditor(2);
