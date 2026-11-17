@@ -57,6 +57,7 @@ kbd{display:inline-block;min-width:22px;text-align:center;padding:1px 6px;margin
 #cbLed{width:12px;height:12px;border-radius:50%;background:#7a7f8c;border:2px solid var(--ink);display:block;margin-left:4px}
 #cbLed.rx{background:#2ec4b6;box-shadow:0 0 10px #2ec4b6}#cbLed.tx{background:#e63946;box-shadow:0 0 10px #e63946}
 #cbTalk{width:40px!important;height:40px!important;font-size:18px}#cbTalk.on{background:#e63946!important}
+#vu{display:flex;flex-direction:column;gap:3px}#vu[hidden]{display:none}#vu i{display:block;width:34px;height:6px;border:2px solid var(--ink);border-radius:4px;background:#fff;overflow:hidden}#vu b{display:block;height:100%;width:0;background:#e63946;transition:width .08s}#vuHim b{background:#2ec4b6}
 #cbTalk.pulse{animation:pulse 1s infinite}@keyframes pulse{50%{transform:scale(1.15)}}
 #rMusic{opacity:.55}#rMusic.on{opacity:1}
 .lv{font-size:12px;font-weight:800;margin-top:6px;opacity:.85}.lv i{display:block;height:8px;border:2px solid var(--ink);border-radius:6px;margin-top:3px;background:linear-gradient(90deg,#ffd23f var(--p),#fff var(--p))}
@@ -140,7 +141,8 @@ kbd{display:inline-block;min-width:22px;text-align:center;padding:1px 6px;margin
 <div id="radio" class="panel" hidden>
   <i id="cbLed"></i>
   <div id="rName">📻 Radio CB · canal 19<small id="cbStat">messages rapides : touches 1 à 6</small></div>
-  <button id="cbTalk" title="Maintenir pour parler (V)">🎙️</button>
+  <span id="vu" hidden title="toi / ton pote"><i id="vuMe"><b></b></i><i id="vuHim"><b></b></i></span>
+  <button id="cbTalk" title="Allumer le micro">🎙️</button>
   <button id="rMusic" title="Musique (N)">🎵</button>
 </div>
 <button id="pauseBtn" hidden title="Pause / commandes">❚❚</button>
@@ -53849,6 +53851,7 @@ class Car{
     const M=MODELS[this.model]||MODELS.baroudeur;Object.assign(this,{wb:M.wb,tr:M.tr,wr:M.wr,lift:M.lift,k:M.k,travel:M.travel,sag:G/(4*M.k),dmp:D_S*Math.sqrt(M.k/24)});
     this.M=[[this.tr,this.wb],[-this.tr,this.wb],[this.tr,-this.wb],[-this.tr,-this.wb]];
     const root=new THREE.Group(),tilt=new THREE.Group();tilt.position.y=0.9+this.lift;root.add(tilt);
+    const axle=new THREE.Group();root.add(axle);this.axle=axle;   // roues + amortisseurs : penchent avec la caisse
     const main=lamb(this.color);this.mainM=main;const dark=lamb(0x2b2d36),grey=lamb(0x8d93a0);
     const glass=new THREE.MeshLambertMaterial({color:0xa8dcff,transparent:true,opacity:0.25,depthWrite:false});
     const lighter=lamb(new THREE.Color(this.color).lerp(new THREE.Color(0xffffff),0.25).getHex());
@@ -53898,8 +53901,8 @@ class Car{
       const st=new THREE.Group();st.position.set(x,this.wr,z);const sp2=new THREE.Group();st.add(sp2);
       const t=new THREE.Mesh(tire,tireM);t.castShadow=true;sp2.add(t);sp2.add(new THREE.Mesh(rim,this.rimM));
       for(let k=0;k<4;k++){const lug=new THREE.Mesh(new THREE.BoxGeometry(0.5*Math.max(1,this.wr/0.55),this.wr*0.18,this.wr*0.4),tireM);lug.rotation.x=k*Math.PI/4;sp2.add(lug);}
-      root.add(st);
-      const shock=new THREE.Group();root.add(shock);
+      axle.add(st);
+      const shock=new THREE.Group();axle.add(shock);
       const coil=new THREE.Mesh(coilGeo,coilM),body=new THREE.Mesh(damperGeo,dampM),rod=new THREE.Mesh(rodGeo,rodM);
       shock.add(coil,body,rod);
       if(M.smallFront&&wi<2)sp2.scale.setScalar(M.smallFront);
@@ -53963,14 +53966,14 @@ class Car{
       vf-=vf*drag*dt*tf+vf*Math.abs(vf)*0.0015*dt;
       if(inp.hand)vf-=vf*1.1*dt*tf;
       const grip=S.grip*(MODELS[this.model]||MODELS.baroudeur).grip*(inp.hand?0.2:1)*(water?0.7:1)*Math.max(0.3,tf);
-      this.slip=Math.abs(vl);vl*=Math.exp(-grip*dt);
+      this.slip=Math.abs(vl);this.slipAng=Math.abs(vf)>2?Math.atan2(Math.abs(vl),Math.abs(vf)):0;vl*=Math.exp(-grip*dt);
       this.spinSlip=(thr>0.7&&vf<7&&vf>-1&&this.surf!==4)?(1-vf/7):0;
       let sa=this.steer*0.62/(1+Math.abs(vf)*0.055),tyr=vf*Math.tan(sa)/2.7;
       if(inp.hand)tyr*=1.7;tyr=clamp(tyr,-2.3,2.3);
       this.yawRate+=(tyr-this.yawRate)*Math.min(1,dt*9*Math.max(0.3,tf));
       this.vx=fx*vf+lx*vl;this.vz=fz*vf+lz*vl;
       const gS=G*ADMIN.grav*ny*0.9*tf;this.vx+=gS*nx*dt;this.vz+=gS*nz*dt;
-    }else{this.yawRate*=Math.exp(-0.7*dt);this.slip=0;this.spinSlip=0;}
+    }else{this.yawRate*=Math.exp(-0.7*dt);this.slip=0;this.spinSlip=0;this.slipAng=0;}
     this.vf=vf;this.acc=acc;this.brake=(inp.thr<0&&vf>0.5)||inp.hand;
     this.yaw+=this.yawRate*dt;this.pos.x+=this.vx*dt;this.pos.z+=this.vz*dt;
     // --- caisse : pilonnement, tangage, roulis ---
@@ -54015,7 +54018,7 @@ class Car{
     this.sampleWheels();this.surf=surfaceAt(this.pos.x,this.pos.z);this.depth=WL-heightAt(this.pos.x,this.pos.z);
   }
   updateMesh(dt){
-    this.root.position.copy(this.pos);this.root.rotation.y=this.yaw;this.tilt.rotation.set(this.pitch,0,this.roll);
+    this.root.position.copy(this.pos);this.root.rotation.y=this.yaw;this.tilt.rotation.set(this.pitch,0,this.roll);this.axle.rotation.set(this.pitch,0,this.roll);
     this.spin+=this.vf*dt/this.wr;
     const sc=this.wheelScale||1;
     this.wheels.forEach((w,i)=>{
@@ -54025,10 +54028,10 @@ class Car{
       const wr=this.wr*sc*w.base;
       let y=ym+this.wr-this.sag+clamp(this.wheelH[i]+this.sag-(this.pos.y+ym),0,this.travel+0.28);
       y=Math.max(y,this.wheelH[i]-this.pos.y+wr);
-      w.st.position.y=y;
+      w.st.position.y=y-ym;   // repère des roues penché comme la caisse
       // amortisseur : du moyeu jusqu'au châssis
-      _sa.set(w.x*0.8,1.18-0.9-(this.lift-0.22)*0.3,w.z).applyEuler(this.tilt.rotation).add(this.tilt.position);
-      _sb.set(w.x*0.8,y+0.05,w.z);
+      _sa.set(w.x*0.8,1.18-0.9-(this.lift-0.22)*0.3+this.tilt.position.y,w.z);
+      _sb.set(w.x*0.8,y-ym+0.05,w.z);
       const len=Math.max(0.15,_sa.distanceTo(_sb));_sd.subVectors(_sa,_sb).normalize();
       w.shock.position.copy(_sb);w.shock.quaternion.setFromUnitVectors(_UP,_sd);
       w.coil.scale.set(1,len*0.85,1);w.coil.position.y=len*0.08;
@@ -54173,8 +54176,10 @@ function tricks(p,dt){
   if(car.lastAir>0){const a=car.lastAir;car.lastAir=0;
     if(a>0.45){addXP(p,a*45,a>1.4?`MÉGA SAUT ${a.toFixed(1)} s`:`SAUT ${a.toFixed(1)} s`);mission(p,'jump');if(a>1.4)mission(p,'bigjump');
       if(a>p.prof.jumpRec+0.05&&a>0.8){p.prof.jumpRec=a;toast(`🏅 Nouveau record de saut : ${a.toFixed(2)} s !`);}}}
-  if(car.contact&&car.slip>3.5&&sp>7&&car.depth<0.1){p.driftT+=dt;p.driftEnd=0;}
-  else if(p.driftT>0){p.driftEnd+=dt;if(p.driftEnd>0.35){if(p.driftT>0.7){addXP(p,p.driftT*30,`DRIFT ${p.driftT.toFixed(1)} s`,'#f15bb5');mission(p,'drift',p.driftT);
+  // drift = le 4x4 glisse de travers (angle de dérive > 12°) à bonne vitesse
+  const drifting=car.contact&&car.depth<0.1&&sp>5.5&&((car.slipAng||0)>0.21||car.slip>2.6);
+  if(drifting){p.driftT+=dt;p.driftEnd=0;}
+  else if(p.driftT>0){p.driftEnd+=dt;if(p.driftEnd>0.45){if(p.driftT>0.6){addXP(p,p.driftT*30,`DRIFT ${p.driftT.toFixed(1)} s`,'#f15bb5');mission(p,'drift',p.driftT);
     if(p.driftT>p.prof.driftRec+0.1&&p.driftT>2){p.prof.driftRec=p.driftT;toast(`🏅 Nouveau record de drift : ${p.driftT.toFixed(1)} s !`);}}p.driftT=0;}}
   if(car.splashed){car.splashed=false;addXP(p,20,'SPLASH !','#3fa7e0');mission(p,'splash');}
   p.distAcc+=sp*dt;if(p.distAcc>=100){p.distAcc-=100;mission(p,'dist',100);p.prof.km=(p.prof.km||0)+0.1;}
@@ -54429,7 +54434,7 @@ function lobby(html){const l=document.getElementById('lobby');if(!html){l.hidden
 function netHost(){
   if(!window.Peer){toast('Le mode en ligne est indisponible ici 😕');return;}
   Net.host=true;Net.code=genCode();
-  Net.peer=new Peer(ID_PREFIX+Net.code,{debug:0});
+  Net.peer=new Peer(ID_PREFIX+Net.code,{debug:0,config:ICE});
   Net.peer.on('open',()=>{
     lobby(`🌐 Code de la partie : <span style="font-size:22px;letter-spacing:4px">${Net.code}</span> <button id="bInvite">Copier le lien</button><span style="opacity:.6">en attente du pote…</span>`);
     cgCall(s=>{const u=s.game.inviteLink({room:Net.code});Net.inviteUrl=u;});
@@ -54444,7 +54449,7 @@ function netJoin(code){
   if(!window.Peer){toast('Le mode en ligne est indisponible ici 😕');return;}
   Net.host=false;Net.code=code.toUpperCase();
   lobby(`🔗 Connexion à la partie <b>${Net.code}</b>…`);
-  Net.peer=new Peer({debug:0});
+  Net.peer=new Peer({debug:0,config:ICE});
   Net.peer.on('open',()=>setupConn(Net.peer.connect(ID_PREFIX+Net.code,{reliable:true})));
   Net.peer.on('call',onCall);
   Net.peer.on('error',e=>{toast(e.type==='peer-unavailable'?'❌ Partie introuvable, vérifie le code':'Réseau : '+(e.type||'erreur'));lobby(null);});
@@ -54454,11 +54459,13 @@ function setupConn(c){
   c.on('open',()=>{Net.connected=true;const me=players[0].car;
     c.send({t:'hello',name:me.name,color:me.color,model:me.model,lvl:players[0].lvl,host:Net.host,dayT,radio:Radio.st,balises:[...collected]});
     lobby(`🌐 Partie <b>${Net.code}</b> · connecté ✅ <button id="bTalk">📻 Allumer la radio CB (micro)</button>`);
-    document.getElementById('bTalk').onclick=enableTalkie;cbStatus();
+    document.getElementById('bTalk').onclick=()=>{Net.open=true;enableTalkie();};cbStatus();
+    // on demande le micro tout de suite : la radio marche sans rien régler
+    if(Net.stream)callPartner();else if(Net.open)enableTalkie();
     cgCall(s=>s.game.hideInviteButton());
   });
   c.on('data',onNet);
-  c.on('close',()=>{Net.connected=false;toast('📴 Ton pote s\'est déconnecté');if(Net.remote){cars=cars.filter(x=>x!==Net.remote);Net.remote.dispose();Net.remote=null;}Winch.on=false;if(Net.host)lobby(`🌐 Code : <b>${Net.code}</b> · en attente…`);else lobby(null);Net.conn=null;});
+  c.on('close',()=>{Net.connected=false;Net.hearing=false;Net.call=null;toast('📴 Ton pote s\'est déconnecté');if(Net.remote){cars=cars.filter(x=>x!==Net.remote);Net.remote.dispose();Net.remote=null;}Winch.on=false;if(Net.host)lobby(`🌐 Code : <b>${Net.code}</b> · en attente…`);else lobby(null);Net.conn=null;});
 }
 function onNet(m){
   if(!m||!m.t)return;
@@ -54490,51 +54497,101 @@ function netTick(){
   netSend({t:'s',x:+c.pos.x.toFixed(2),y:+c.pos.y.toFixed(2),z:+c.pos.z.toFixed(2),yaw:+c.yaw.toFixed(3),p:+c.pitch.toFixed(3),r:+c.roll.toFixed(3),st:+c.steer.toFixed(2),vx:+c.vx.toFixed(2),vz:+c.vz.toFixed(2),vy:+c.vy.toFixed(2),vf:+c.vf.toFixed(2),l:c.lights,h:c.horn,b:c.brake,th:c.thr,sl:+c.slip.toFixed(1),ss:+c.spinSlip.toFixed(2),c:c.contact});
   if(Math.random()<0.01&&Net.host)netSend({t:'time',v:dayT});
 }
+/* ---------- Radio CB : vraie voix entre les deux joueurs ---------- */
+// serveurs STUN + relais TURN publics : la voix passe même derrière les box strictes
+const ICE={iceServers:[
+  {urls:['stun:stun.l.google.com:19302','stun:stun1.l.google.com:19302']},
+  {urls:'stun:global.stun.twilio.com:3478'},
+  {urls:'turn:openrelay.metered.ca:80',username:'openrelayproject',credential:'openrelayproject'},
+  {urls:'turn:openrelay.metered.ca:443',username:'openrelayproject',credential:'openrelayproject'},
+  {urls:'turn:openrelay.metered.ca:443?transport=tcp',username:'openrelayproject',credential:'openrelayproject'},
+]};
+Net.open=store.get('micOpen',true);   // micro ouvert (comme un appel) par défaut
+Net.ptt=false;
 async function enableTalkie(){
+  if(Net.stream){return true;}
+  if(Net._asking)return false;Net._asking=true;
   try{
-    Net.stream=await navigator.mediaDevices.getUserMedia({audio:{echoCancellation:true,noiseSuppression:true}});
-    Net.stream.getAudioTracks().forEach(t=>t.enabled=false);
-    const remoteId=Net.host?Net.conn.peer:ID_PREFIX+Net.code;
-    const call=Net.peer.call(remoteId,Net.stream);attachCall(call);
-    toast('📻 Radio CB allumée ! Maintiens V (ou 🎙️) pour parler');
-    const b=document.getElementById('bTalk');if(b)b.remove();lobby(`🌐 Partie <b>${Net.code}</b> · connecté ✅ · 📻 radio CB allumée`);cbStatus();
-  }catch(e){toast('🎙️ Micro refusé ou indisponible : utilise les messages rapides 1-6');}
+    Net.stream=await navigator.mediaDevices.getUserMedia({audio:{echoCancellation:true,noiseSuppression:true,autoGainControl:true}});
+    applyMic();
+    if(AC){try{const src=AC.createMediaStreamSource(Net.stream);Net.meMeter=AC.createAnalyser();Net.meMeter.fftSize=512;src.connect(Net.meMeter);}catch(e){}}
+    callPartner();
+    toast(Net.open?'📻 Radio CB allumée : ton pote t\'entend ! (🎙️ pour couper)':'📻 Radio CB allumée : maintiens V pour parler');
+    const b=document.getElementById('bTalk');if(b)b.remove();
+    if(Net.connected)lobby(`🌐 Partie <b>${Net.code}</b> · connecté ✅ · 📻 radio CB allumée`);
+    cbStatus();return true;
+  }catch(e){
+    toast('🎙️ Micro refusé : autorise le micro (icône 🔒 dans la barre d\'adresse) puis clique sur 🎙️');
+    return false;
+  }finally{Net._asking=false;}
+}
+function callPartner(){
+  if(!Net.stream||!Net.connected||!Net.peer)return;
+  const remoteId=Net.host?Net.conn.peer:ID_PREFIX+Net.code;
+  try{const call=Net.peer.call(remoteId,Net.stream);if(call)attachCall(call);}catch(e){}
 }
 function onCall(call){call.answer(Net.stream||undefined);attachCall(call);}
 function attachCall(call){
-  if(Net.call&&Net.call!==call){try{Net.call.close();}catch(e){}}
+  if(Net.call&&Net.call!==call){const old=Net.call;Net.call=null;try{old.close();}catch(e){}}
   Net.call=call;
   call.on('stream',s=>{
-    if(!Net.audio){Net.audio=new Audio();Net.audio.autoplay=true;}Net.audio.srcObject=s;
-    // son « talkie » : on filtre la voix du pote (bande étroite + léger grain)
-    if(AC){try{Net.audio.muted=true;if(Net.vsrc)Net.vsrc.disconnect();const src=AC.createMediaStreamSource(s),hp=AC.createBiquadFilter(),lp=AC.createBiquadFilter(),ws=AC.createWaveShaper(),g=AC.createGain();
-      hp.type='highpass';hp.frequency.value=380;lp.type='lowpass';lp.frequency.value=3000;const cu=new Float32Array(256);for(let i=0;i<256;i++){const x=i/128-1;cu[i]=Math.tanh(x*2.2);}ws.curve=cu;g.gain.value=1.8;
-      src.connect(hp).connect(lp).connect(ws).connect(g).connect(master);Net.vsrc=src;}catch(e){Net.audio.muted=false;}}
-    Net.audio.play().catch(()=>{});
+    // lecture directe dans un vrai lecteur audio : le plus fiable sur tous les navigateurs
+    if(!Net.audio){Net.audio=document.createElement('audio');Net.audio.autoplay=true;Net.audio.setAttribute('playsinline','');Net.audio.style.display='none';document.body.appendChild(Net.audio);}
+    Net.audio.muted=false;Net.audio.volume=1;Net.audio.srcObject=s;
+    Net.audio.play().catch(()=>{toast('🔈 Clique n\'importe où pour entendre ton pote');Net.needPlay=true;});
+    if(AC){try{const src=AC.createMediaStreamSource(s);Net.himMeter=AC.createAnalyser();Net.himMeter.fftSize=512;src.connect(Net.himMeter);}catch(e){}}
+    Net.hearing=true;cbStatus();
   });
+  const retry=()=>{if(Net.call===call){Net.call=null;Net.hearing=false;cbStatus();if(Net.connected&&Net.stream)setTimeout(()=>{if(!Net.call)callPartner();},1500);}};
+  call.on('close',retry);call.on('error',retry);
 }
+addEventListener('pointerdown',()=>{if(Net.needPlay&&Net.audio){Net.audio.play().then(()=>{Net.needPlay=false;}).catch(()=>{});}if(AC&&AC.state!=='running')AC.resume();},true);
+function applyMic(){
+  const on=!!(Net.stream&&(Net.open||Net.ptt));
+  if(Net.stream)Net.stream.getAudioTracks().forEach(t=>t.enabled=on);
+  if(Net.talking!==on){Net.talking=on;netSend({t:'talk',on});if(Net.ptt||!on)cbSquelch(on);
+    if(radioBus&&AC)radioBus.gain.setTargetAtTime(Radio.vol*(on?0.12:0.55),AC.currentTime,0.1);}
+  cbStatus();
+}
+// V maintenu = parler (même si le micro ouvert est coupé)
 function talk(on){
   if(!Net.connected){if(on&&started)toast(players.length===2?'📻 À deux sur le même écran : utilise les messages rapides 1-6 (pavé num. pour le pilote 2)':'📻 La radio CB marche en ligne : crée une partie et invite ton pote !');return;}
-  if(on&&!Net.stream){enableTalkie();return;}
-  if(Net.stream){Net.stream.getAudioTracks().forEach(t=>t.enabled=on);}
-  if(Net.talking!==on){Net.talking=on;netSend({t:'talk',on});cbSquelch(on);if(radioBus&&AC)radioBus.gain.setTargetAtTime(Radio.vol*(on?0.1:0.55),AC.currentTime,0.1);}
-  cbStatus();
+  if(on&&!Net.stream){enableTalkie().then(ok=>{if(ok){Net.ptt=keys.has('KeyV');applyMic();}});return;}
+  Net.ptt=on;applyMic();
+}
+// bouton 🎙️ = couper / rallumer le micro ouvert
+async function toggleMic(){
+  if(!Net.connected){talk(true);return;}
+  if(!Net.stream){Net.open=true;store.set('micOpen',true);await enableTalkie();return;}
+  Net.open=!Net.open;store.set('micOpen',Net.open);applyMic();
+  toast(Net.open?'🎙️ Micro ouvert : ton pote t\'entend':'🔇 Micro coupé (maintiens V pour parler)');
 }
 // « kchhh » + bip de fin, comme une vraie CB
 function cbSquelch(start){
   if(!AC)return;const t=AC.currentTime,n=AC.createBufferSource();n.buffer=NOISE;const f=AC.createBiquadFilter(),g=AC.createGain();
-  f.type='bandpass';f.frequency.value=2200;f.Q.value=0.7;env(g,t,0.005,0.12,start?0.12:0.2);n.connect(f).connect(g).connect(sfxBus);n.start(t,Math.random());n.stop(t+0.3);
-  if(!start)blip([1250],0.07,'sine',0.07);
+  f.type='bandpass';f.frequency.value=2200;f.Q.value=0.7;env(g,t,0.005,0.1,start?0.12:0.2);n.connect(f).connect(g).connect(sfxBus);n.start(t,Math.random());n.stop(t+0.3);
+  if(!start)blip([1250],0.07,'sine',0.06);
 }
+function level(an){if(!an)return 0;const d=new Uint8Array(an.fftSize);an.getByteTimeDomainData(d);let m=0;for(let i=0;i<d.length;i++){const v=Math.abs(d[i]-128);if(v>m)m=v;}return Math.min(1,m/60);}
+setInterval(()=>{
+  const me=Net.talking?level(Net.meMeter):0,him=level(Net.himMeter);
+  const a=document.querySelector('#vuMe b'),b=document.querySelector('#vuHim b');
+  if(a)a.style.width=Math.round(me*100)+'%';if(b)b.style.width=Math.round(him*100)+'%';
+  const speak=him>0.12;if(speak!==Net._himSpeak){Net._himSpeak=speak;document.getElementById('cbLed').className=Net.talking?'tx':(speak||Net.remoteTalking)?'rx':'';}
+},90);
 function cbStatus(){
-  const led=document.getElementById('cbLed'),st=document.getElementById('cbStat'),bt=document.getElementById('cbTalk');
-  led.className=Net.talking?'tx':Net.remoteTalking?'rx':'';bt.classList.toggle('on',Net.talking);
-  bt.classList.toggle('pulse',Net.connected&&!Net.stream);
-  if(Net.talking)st.textContent='🔴 tu parles…';
-  else if(Net.remoteTalking&&Net.remote)st.textContent=`📡 ${Net.remote.name} parle…`;
-  else if(Net.connected&&Net.stream)st.textContent='maintiens V pour parler · 1-6 messages';
-  else if(Net.connected)st.textContent='clique 🎙️ pour allumer le micro';
-  else st.textContent=players.length===2?'messages rapides : 1-6 / pavé num. 1-6':'messages rapides : touches 1 à 6';
+  const led=document.getElementById('cbLed'),st=document.getElementById('cbStat'),bt=document.getElementById('cbTalk'),vu=document.getElementById('vu');
+  led.className=Net.talking?'tx':Net.remoteTalking?'rx':'';
+  bt.classList.toggle('on',!!(Net.stream&&Net.talking));bt.classList.toggle('pulse',Net.connected&&!Net.stream);
+  bt.textContent=Net.stream&&!Net.open&&!Net.ptt?'🔇':'🎙️';
+  bt.title=Net.stream?(Net.open?'Couper le micro':'Rallumer le micro'):'Allumer le micro';
+  if(vu)vu.hidden=!Net.connected;
+  const who=Net.remote?Net.remote.name:'ton pote';
+  if(!Net.connected)st.textContent=players.length===2?'messages rapides : 1-6 / pavé num. 1-6':'en ligne : parle avec ton pote · 1-6 messages';
+  else if(!Net.stream)st.textContent='clique 🎙️ pour allumer le micro';
+  else if(Net.ptt)st.textContent='🔴 tu parles…';
+  else if(Net.open)st.textContent=Net.hearing?`🟢 en ligne avec ${who}`:`🟡 connexion de la voix…`;
+  else st.textContent='🔇 micro coupé · maintiens V pour parler';
 }
 
 /* =========================================================
@@ -54628,6 +54685,7 @@ function drawProgress(p,r,sm,ty){
     hx.fillText(`${done?'✅':'🎯'} ${m.txt}`,bx+7,my+11,w-60);hx.textAlign='right';hx.fillText(pr,bx+w-7,my+11);
     my+=28;
   }
+  if(p.driftT>0.35){const pulse=1+Math.sin(performance.now()/90)*0.04;txt(`DRIFT ${p.driftT.toFixed(1)} s`,r.x+r.w/2,r.y+r.h*0.3,Math.round(30*fs*pulse),'#f15bb5');}
   // gains d'XP qui s'envolent
   p.pops.forEach((q,i)=>{const a=1-q.t/2.2,y=r.y+r.h*0.62-q.t*40-(p.pops.length-1-i)*30;hx.globalAlpha=Math.min(1,a*2);txt(q.text,r.x+r.w/2,y,Math.round(22*fs+Math.max(0,0.25-q.t)*30),q.color);hx.globalAlpha=1;});
   // bulles radio CB au-dessus des 4x4
@@ -54926,7 +54984,7 @@ function swatches(id,key){
 const KEYHELP=`
 <div><b>🟠 Pilote 1</b><br><kbd>Z</kbd><kbd>Q</kbd><kbd>S</kbd><kbd>D</kbd> conduire (W A S D en QWERTY)<br><kbd>Espace</kbd> frein à main · <kbd>E</kbd> klaxon · <kbd>F</kbd> phares<br><kbd>R</kbd> (maintenir) roue d'émotes · <kbd>A</kbd> changer de vue<br><kbd>T</kbd> treuil · <kbd>C</kbd> poser / enlever un repère · <kbd>G</kbd> rejoindre le pote · <kbd>X</kbd> remettre d'aplomb<br><kbd>1</kbd>…<kbd>6</kbd> messages radio</div>
 <div><b>🔵 Pilote 2</b><br><kbd>↑</kbd><kbd>←</kbd><kbd>↓</kbd><kbd>→</kbd> conduire<br><kbd>Shift droit</kbd> frein à main · <kbd>K</kbd> klaxon · <kbd>L</kbd> phares<br><kbd>J</kbd> (maintenir) roue d'émotes · <kbd>Entrée</kbd> changer de vue<br><kbd>O</kbd> treuil · <kbd>P</kbd> repère · <kbd>U</kbd> rejoindre · <kbd>I</kbd> aplomb<br>pavé num. <kbd>1</kbd>…<kbd>6</kbd> messages radio</div>
-<div><b>📻 Radio CB & caméra</b><br><kbd>V</kbd> (maintenir) parler à ton pote en ligne<br>🖱️ clic-glisser : tourner la caméra · molette : zoom<br>Vues : poursuite, loin, <b>intérieure</b> (volant), <b>caméra libre</b><br><kbd>B</kbd> défi course · <kbd>N</kbd> musique · <kbd>H</kbd> mode photo · <kbd>Échap</kbd> pause</div>
+<div><b>📻 Radio CB & caméra</b><br>🎙️ micro ouvert avec ton pote en ligne (clic = couper) · <kbd>V</kbd> maintenir pour parler<br>🖱️ clic-glisser : tourner la caméra · molette : zoom<br>Vues : poursuite, loin, <b>intérieure</b> (volant), <b>caméra libre</b><br><kbd>B</kbd> défi course · <kbd>N</kbd> musique · <kbd>H</kbd> mode photo · <kbd>Échap</kbd> pause</div>
 <div><b>⭐ Progresser</b><br>Sauts, drifts, splashs, balises, missions = XP.<br>Rouler ensemble (convoi) = <b>XP ×1.5</b> !<br>Chaque niveau débloque un truc pour ton 4x4.<br>🎮 Manette : RT/LT, A frein, B klaxon, X phares, Y émotes, LB treuil, RB repère, stick droit caméra, clic stick = vue</div>`;
 document.getElementById('keysHelp').innerHTML=KEYHELP;document.getElementById('keysHelp2').innerHTML=KEYHELP;
 function openMenu(){
@@ -54964,7 +55022,7 @@ function startGame(m){
 }
 function cleanup(){
   for(const c of cars)c.dispose();for(const p of players){scene.remove(p.ping);}cars=[];players=[];
-  if(Net.peer){try{Net.peer.destroy();}catch(e){}}Object.assign(Net,{peer:null,conn:null,connected:false,remote:null,call:null,talking:false,remoteTalking:false});
+  if(Net.peer){try{Net.peer.destroy();}catch(e){}}Object.assign(Net,{peer:null,conn:null,connected:false,remote:null,call:null,talking:false,remoteTalking:false,ptt:false,hearing:false,meMeter:null,himMeter:null});
   if(Net.stream){Net.stream.getTracks().forEach(t=>t.stop());Net.stream=null;}
   Winch.on=false;Race.active=false;raceFlag.visible=false;lobby(null);
 }
@@ -54982,8 +55040,7 @@ document.getElementById('pauseBtn').onclick=()=>togglePause();
 document.getElementById('bQuit').onclick=()=>{paused=false;started=false;document.getElementById('pause').hidden=true;document.getElementById('radio').hidden=true;document.getElementById('pauseBtn').hidden=true;cleanup();cgGameplay(false);try{speechSynthesis.cancel();}catch(e){}openMenu();};
 document.getElementById('rMusic').onclick=e=>{initAudio();setStation(Radio.st+1);toast(`🎵 ${STATIONS[Radio.st].name}`);e.target.blur();};
 const cbB=document.getElementById('cbTalk');
-cbB.addEventListener('pointerdown',e=>{e.preventDefault();initAudio();talk(true);});
-['pointerup','pointerleave','pointercancel'].forEach(ev=>cbB.addEventListener(ev,()=>{if(Net.talking)talk(false);}));
+cbB.addEventListener('click',e=>{e.preventDefault();initAudio();toggleMic();cbB.blur();});
 const mSt=document.getElementById('mStation');STATIONS.forEach((st,i)=>{const o=document.createElement('option');o.value=i;o.textContent=st.name;mSt.appendChild(o);});mSt.value=Radio.st;mSt.onchange=()=>{initAudio();setStation(+mSt.value);};
 document.getElementById('bTime').onclick=()=>{dayT=(dayT+0.125)%1;netSend({t:'time',v:dayT});toast('⏰ On avance le temps…');};
 const rVol=document.getElementById('rVol');rVol.value=Math.round(Radio.vol*100);rVol.oninput=()=>setRadioVol(rVol.value/100);
