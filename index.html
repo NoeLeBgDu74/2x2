@@ -54312,7 +54312,8 @@ class Car{
       acc*=Math.max(0.35,tf);vf+=acc*dt;
       const drag=S.drag*(water?3.2:1)+(thr===0?0.3:0);
       vf-=vf*drag*dt*tf+vf*Math.abs(vf)*0.0015*dt;
-      if(inp.hand)vf-=vf*1.1*dt*tf;
+      // frein à main : bloque les roues (freinage net, glisse en virage)
+      if(inp.hand){const dec=Math.min(Math.abs(vf),8.5*dt*Math.max(0.4,tf)*Math.min(1.2,S.grip/6+0.3));vf-=Math.sign(vf)*dec;}
       const grip=S.grip*(MODELS[this.model]||MODELS.baroudeur).grip*(inp.hand?0.2:1)*(water?0.7:1)*Math.max(0.3,tf);
       this.slip=Math.abs(vl);this.slipAng=Math.abs(vf)>2?Math.atan2(Math.abs(vl),Math.abs(vf)):0;vl*=Math.exp(-grip*dt);
       this.spinSlip=(thr>0.7&&vf<7&&vf>-1&&this.surf!==4)?(1-vf/7):0;
@@ -54329,6 +54330,8 @@ class Car{
       }
       this.vx=fx*vf+lx*vl;this.vz=fz*vf+lz*vl;
       const gS=G*ADMIN.grav*ny*0.9*tf;this.vx+=gS*nx*dt;this.vz+=gS*nz*dt;
+      // à l'arrêt, frein à main serré : la voiture tient même en pente
+      if(inp.hand&&Math.hypot(this.vx,this.vz)<1.2&&inp.thr===0){const k=Math.exp(-dt*14);this.vx*=k;this.vz*=k;}
     }else{this.yawRate*=Math.exp(-0.7*dt);this.slip=0;this.spinSlip=0;this.slipAng=0;}
     this.vf=vf;this.acc=acc;this.brake=(inp.thr<0&&vf>0.5)||inp.hand;
     this.yaw+=this.yawRate*dt;this.pos.x+=this.vx*dt;this.pos.z+=this.vz*dt;
@@ -54589,6 +54592,7 @@ addEventListener('keydown',e=>{
   }}
 });
 addEventListener('keyup',e=>{
+  if(e.code==='Space'&&started&&!(document.activeElement&&document.activeElement.tagName==='INPUT'))e.preventDefault();
   keys.delete(e.code);
   if(e.code==='KeyV')talk(false);
   for(const p of players)for(const m of keysFor(p)){if(m.horn===e.code)p.car.horn=false;if(m.emote===e.code)closeWheel(p);}
@@ -54658,7 +54662,7 @@ function pollInput(p){
     steer=0;
   }
   if(rx||ry){if(p.view===3)p.freeYaw-=rx*0.05;else p.oy-=rx*0.05;p.op=clamp(p.op+ry*0.03,p.view===2?-0.9:-0.35,1.35);p.lookT=0;}
-  if(p.onFoot||p.footAnim){let f=thr,sv=steer;if(p._tf&&(p._tf.f||p._tf.s)){f=p._tf.f;sv=p._tf.s;}if(p._pf&&(p._pf.f||p._pf.s)){f=p._pf.f;sv=p._pf.s;}p._tf=p._pf=null;p.footInput={f:clamp(f,-1,1),s:clamp(sv,-1,1),run:hand};p.car.input.thr=0;p.car.input.steer=0;p.car.input.hand=false;return;}
+  if(p.onFoot||p.footAnim){let f=thr,sv=steer;if(p._tf&&(p._tf.f||p._tf.s)){f=p._tf.f;sv=p._tf.s;}if(p._pf&&(p._pf.f||p._pf.s)){f=p._pf.f;sv=p._pf.s;}p._tf=p._pf=null;p.footInput={f:clamp(f,-1,1),s:clamp(sv,-1,1),run:hand};p.car.input.thr=0;p.car.input.steer=0;p.car.input.hand=!((p.pushT||0)>0);return;}   // garé : frein à main serré, sauf quand on pousse
   p.car.input.thr=clamp(thr,-1,1);p.car.input.steer=clamp(steer,-1,1);p.car.input.hand=hand;
 }
 
@@ -54670,7 +54674,7 @@ function doAction(p,a){
     case'lock':car.lock=!car.lock;blip([car.lock?400:600],0.08,'square',0.07);toast(car.lock?'🔒 Blocage de différentiel : accroche dans la boue, le sable et la neige':'🔓 Différentiel débloqué');break;
     case'hazard':car.hazard=!car.hazard;blip([700,700],0.04,'square',0.05,0.12);break;
     case'foot':toggleFoot(p);break;
-    case'door':if(!car.door){toast('Ce véhicule n’a pas de portière');break;}car.doorTarget=car.doorTarget?0:1;blip(car.doorTarget?[260,200]:[180,320],0.06,'square',0.06,0.05);break;
+    case'door':toggleFoot(p);break;   // ouvrir la portière = sortir (ou remonter si on est à pied près de la portière)
     case'cam':p.view=(p.view+1)%VIEWS.length;p.oy=0;p.op=p.view===2?0:0.15;p.zoom=p.view===3?2.2:1;p.freeYaw=car.yaw+Math.PI;toast(`🎥 ${car.name} : ${VIEWS[p.view]}`);break;
     case'reset':
       if(car.depth>0.8)car.respawn();else{car.place(car.pos.x,car.pos.z,car.yaw);}
@@ -55660,12 +55664,13 @@ function footTick(p,dt){
       if(speed>0.5&&!c.remote){
         // on pousse : force réaliste (un humain contre ~1,8 t), seulement si le 4x4 roule moins vite que nous
         const along=c.vx*mx+c.vz*mz;
-        if(along<(run?2.2:1.5)){const acc=(run?0.95:0.6)*(c.input.hand&&c===car&&!p.onFoot?0:1);c.vx+=mx*acc*dt;c.vz+=mz*acc*dt;c.input.hand=false;pushing=true;}
+        if(along<(run?2.2:1.5)){const acc=run?0.95:0.6;c.vx+=mx*acc*dt;c.vz+=mz*acc*dt;c.input.hand=false;pushing=true;}
       }
     }
   }
   ch.g.position.x=nx;ch.g.position.z=nz;ch.g.position.y+=(Math.max(heightAt(nx,nz),WL-0.9)-ch.g.position.y)*Math.min(1,dt*14);
   ch.g.rotation.y=p.chYaw;
+  p.pushT=pushing?1.5:Math.max(0,(p.pushT||0)-dt);   // frein relâché tant qu'on pousse (et 1,5 s après)
   ch.pose(pushing?'push':state,dt);p.chState=pushing?3:state==='run'?2:state==='walk'?1:0;
   if(pushing){p._grunt=(p._grunt||0)-dt;if(p._grunt<=0){p._grunt=1.4+Math.random();blip([120+Math.random()*30],0.18,'sawtooth',0.035);}
     if(Math.random()<0.3)FX.spawn(nx-mx*0.4,ch.g.position.y+0.1,nz-mz*0.4,-mx,0.6,-mz,0.9,0.3,1.2,0.4,SURF[surfaceAt(nx,nz)].dcol,0,1.5);}
@@ -55718,8 +55723,8 @@ function refreshTouch(){const el=document.getElementById('touch');const show=sta
    Aide des commandes : clavier / manette / tactile
    ========================================================= */
 const HELP={
-keys:`<div><b>🟠 Pilote 1</b><br><kbd>Z</kbd><kbd>Q</kbd><kbd>S</kbd><kbd>D</kbd> conduire (W A S D en QWERTY) · <kbd>Shift</kbd> gaz doux<br><kbd>Espace</kbd> frein à main · <kbd>E</kbd> klaxon · <kbd>F</kbd> phares<br><kbd>R</kbd> (maintenir) roue d'émotes · <kbd>A</kbd> changer de vue<br><kbd>T</kbd> treuil · <kbd>C</kbd> repère · <kbd>G</kbd> rejoindre le pote · <kbd>X</kbd> remettre d'aplomb<br><kbd>Tab</kbd> sortir / remonter · <kbd>0</kbd> portière · <kbd>7</kbd> 4L · <kbd>8</kbd> blocage · <kbd>9</kbd> warnings<br><kbd>1</kbd>…<kbd>6</kbd> messages radio</div>
-<div><b>🔵 Pilote 2</b><br><kbd>↑</kbd><kbd>←</kbd><kbd>↓</kbd><kbd>→</kbd> conduire · <kbd>Shift droit</kbd> frein à main<br><kbd>K</kbd> klaxon · <kbd>L</kbd> phares · <kbd>J</kbd> émotes · <kbd>Entrée</kbd> vue<br><kbd>O</kbd> treuil · <kbd>P</kbd> repère · <kbd>U</kbd> rejoindre · <kbd>I</kbd> aplomb<br><kbd>Retour arrière</kbd> sortir · pavé num. <kbd>.</kbd> portière · <kbd>7</kbd><kbd>8</kbd><kbd>9</kbd> 4L / blocage / warnings · <kbd>1</kbd>…<kbd>6</kbd> radio</div>
+keys:`<div><b>🟠 Pilote 1</b><br><kbd>Z</kbd><kbd>Q</kbd><kbd>S</kbd><kbd>D</kbd> conduire (W A S D en QWERTY) · <kbd>Shift</kbd> gaz doux<br><kbd>Espace</kbd> frein à main · <kbd>E</kbd> klaxon · <kbd>F</kbd> phares<br><kbd>R</kbd> (maintenir) roue d'émotes · <kbd>A</kbd> changer de vue<br><kbd>T</kbd> treuil · <kbd>C</kbd> repère · <kbd>G</kbd> rejoindre le pote · <kbd>X</kbd> remettre d'aplomb<br><kbd>Tab</kbd> ou <kbd>0</kbd> ouvrir la portière et sortir / remonter · <kbd>7</kbd> 4L · <kbd>8</kbd> blocage · <kbd>9</kbd> warnings<br><kbd>1</kbd>…<kbd>6</kbd> messages radio</div>
+<div><b>🔵 Pilote 2</b><br><kbd>↑</kbd><kbd>←</kbd><kbd>↓</kbd><kbd>→</kbd> conduire · <kbd>Shift droit</kbd> frein à main<br><kbd>K</kbd> klaxon · <kbd>L</kbd> phares · <kbd>J</kbd> émotes · <kbd>Entrée</kbd> vue<br><kbd>O</kbd> treuil · <kbd>P</kbd> repère · <kbd>U</kbd> rejoindre · <kbd>I</kbd> aplomb<br><kbd>Retour arrière</kbd> ou pavé num. <kbd>.</kbd> portière : sortir / remonter · <kbd>7</kbd><kbd>8</kbd><kbd>9</kbd> 4L / blocage / warnings · <kbd>1</kbd>…<kbd>6</kbd> radio</div>
 <div><b>📻 Pour les deux</b><br><kbd>V</kbd> (maintenir) parler en ligne · 🎙️ micro ouvert<br><kbd>M</kbd> grande carte + GPS · <kbd>B</kbd> défi course · <kbd>N</kbd> musique<br>🖱️ clic-glisser : caméra · molette : zoom · <kbd>H</kbd> mode photo · <kbd>Échap</kbd> pause</div>
 <div><b>⭐ À faire</b><br>Balises, missions, drifts, sauts = XP + 💰 pièces.<br>🔧 Garage (près du départ) : acheter des véhicules, livraisons 📦.<br>⚠️ Zone PRO (sud-est) : parcours chronométré · 🌙 la nuit : camping ⛺🔥</div>`,
 pad:`<div><b>🎮 Conduite</b><br><b>RT</b> accélérer (progressif) · <b>LT</b> freiner / reculer<br><b>Stick gauche</b> diriger · <b>A</b> frein à main<br><b>Stick droit</b> caméra · <b>R3</b> changer de vue</div>
@@ -56001,6 +56006,8 @@ document.getElementById('bSolo').onclick=()=>askNick('solo');
 document.getElementById('bHost').onclick=()=>askNick('host');
 document.getElementById('bJoin').onclick=()=>{const v=document.getElementById('jCode').value.trim();if(v.length!==4){toast('Entre le code à 4 caractères de ton pote');return;}askNick('join');};
 document.getElementById('bResume').onclick=()=>togglePause();
+document.addEventListener('click',e=>{const b=e.target.closest&&e.target.closest('button');if(b)setTimeout(()=>b.blur(),0);},true);
+document.addEventListener('change',e=>{const t=e.target;if(t&&(t.tagName==='SELECT'||t.type==='range'))setTimeout(()=>t.blur(),0);},true);
 document.getElementById('pCopy').onclick=()=>{const u=Net.inviteUrl||(location.href.split('?')[0]+'?room='+Net.code);try{navigator.clipboard.writeText(u);toast('🔗 Lien copié !');}catch(e){toast(u);}};
 document.getElementById('tutoSkip').onclick=()=>endTuto(false);
 setupTouch();
