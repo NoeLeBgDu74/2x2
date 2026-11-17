@@ -1,0 +1,17 @@
+{
+  "name": "2X2 — balade 4x4 à deux",
+  "short_name": "2X2",
+  "description": "Balade en 4x4 à deux : boue, sauts, radio CB, treuil, missions et défis.",
+  "start_url": "./",
+  "scope": "./",
+  "display": "fullscreen",
+  "orientation": "landscape",
+  "background_color": "#5fb0ec",
+  "theme_color": "#ff8a3d",
+  "lang": "fr",
+  "icons": [
+    { "src": "icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}
