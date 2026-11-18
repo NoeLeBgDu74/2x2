@@ -118,6 +118,7 @@ body.mobile #rName{display:none}body.mobile #radio{gap:4px;padding:4px 6px}
   .tped{width:66px;height:132px}.tped.red{height:70px;font-size:11px}.thand{width:66px;height:50px;font-size:18px}.tpeds{gap:6px}#tMenu{bottom:270px;grid-template-columns:repeat(2,104px)}}
 @media (max-height:520px){.tsteer button{width:78px;height:78px;font-size:32px}.tped{height:118px;width:74px}.tped.red{height:66px}.thand{width:74px;height:46px}#tMenu{bottom:230px}}
 .htabs{grid-column:1/-1;display:flex;gap:6px}.htabs button{font:inherit;font-weight:800;border:3px solid var(--ink);border-radius:10px;background:#fff;padding:4px 10px;cursor:pointer}.htabs button.on{background:#ffd23f}
+body.mlock::after{content:'';position:fixed;left:50%;top:50%;width:8px;height:8px;margin:-4px 0 0 -4px;border-radius:50%;background:#fff;box-shadow:0 0 0 2px rgba(29,36,51,.7);z-index:9;pointer-events:none}
 #cdash{position:fixed;left:50%;bottom:10px;transform:translateX(-50%);z-index:5;display:flex;align-items:center;gap:8px;padding:6px 10px;background:rgba(20,24,34,.62);border:2px solid rgba(255,255,255,.18);border-radius:18px;backdrop-filter:blur(4px);max-width:98vw}
 #cdash[hidden]{display:none}#cdash canvas{width:150px;height:87px}
 #cdBtns{display:grid;grid-template-columns:repeat(6,58px);gap:5px}
@@ -53416,13 +53417,13 @@ const EN_PAIRS=[
 ['Ton pseudo doit faire au moins 2 lettres','Your nickname needs at least 2 letters'],['Le pseudo du pilote 2 doit faire au moins 2 lettres',"Driver 2's nickname needs at least 2 letters"],['Choisissez deux pseudos différents','Pick two different nicknames'],
 ['Entre le code à 4 caractères de ton pote',"Enter your buddy's 4-character code"],['Rejoindre la partie','Join the game'],['Deux joueurs','Two players'],
 // --- pause ---
-['PAUSE','PAUSE'],['Volume général','Master volume'],['Musique','Music'],['Avancer l\'heure','Skip time'],["Avancer l'heure",'Skip time'],['Qualité','Quality'],['Haute','High'],['Normale','Normal'],['Rapide','Fast'],
+['PAUSE','PAUSE'],['Volume général','Master volume'],['Regard à la souris — Échap, Alt ou clic droit pour libérer la souris','Mouse look — Esc, Alt or right-click to free the mouse'],['Souris libérée','Mouse freed'],['Musique','Music'],['Vue','View'],['Avancer l\'heure','Skip time'],["Avancer l'heure",'Skip time'],['Qualité','Quality'],['Haute','High'],['Normale','Normal'],['Rapide','Fast'],
 ['Reprendre','Resume'],['Menu principal','Main menu'],['Mes véhicules','My vehicles'],["achète-en d'autres au 🔧 garage près du départ",'buy more at the 🔧 garage near the start'],['Revoir le tuto','Replay tutorial'],
 ['Photo (F2)','Photo (F2)'],['Partager','Share'],['Code de la partie','Game code'],['Copier le lien','Copy link'],['Radio coupée','Radio off'],
 // --- aide ---
 ['⌨️ Clavier','⌨️ Keyboard'],['🎮 Manette','🎮 Gamepad'],['📱 Tactile','📱 Touch'],
 ['conduire (W A S D en QWERTY)','drive (Z Q S D on AZERTY)'],['conduire','drive'],['gaz doux','gentle throttle'],['frein à main','handbrake'],['klaxon','horn'],['phares','headlights'],
-['(maintenir) roue d\'émotes','(hold) emote wheel'],["(maintenir) roue d'émotes",'(hold) emote wheel'],['changer de vue','change view'],['treuil','winch'],['repère','marker'],['rejoindre le pote','join your buddy'],['remettre d\'aplomb','flip upright'],["remettre d'aplomb",'flip upright'],
+['(maintenir) roue d\'émotes','(hold) emote wheel'],["(maintenir) roue d'émotes",'(hold) emote wheel'],['changer de vue','change view'],['glisser = regarder','drag = look around'],['Clic droit','Right-click'],['regard souris','mouse look'],['libère la souris','frees the mouse'],["en vue intérieure, clique sur l'écran du tableau de bord",'in cockpit view, click the dashboard screen'],['Échap','Esc'],['treuil','winch'],['repère','marker'],['rejoindre le pote','join your buddy'],['remettre d\'aplomb','flip upright'],["remettre d'aplomb",'flip upright'],
 ['ou','or'],['ouvrir la portière et sortir / remonter','open the door and get out / back in'],['portière : sortir / remonter','door: get out / back in'],['sortir / remonter','get out / back in'],['blocage','diff lock'],['warnings','hazards'],['messages radio','radio messages'],
 ['Shift droit','Right Shift'],['Entrée','Enter'],['vue','view'],['rejoindre','join'],['aplomb','upright'],['Retour arrière','Backspace'],['pavé num.','numpad'],['radio','radio'],
 ['Pour les deux','For both'],['(maintenir) parler en ligne','(hold) talk online'],['micro ouvert','open mic'],['grande carte + GPS','big map + GPS'],['défi course','race challenge'],['musique','music'],
@@ -54590,13 +54591,13 @@ class Car{
     B(1.76,0.3,0.4,dark,0,1.72,0.56,tilt,false);                 // tableau de bord
     B(0.34,0.08,0.04,lamb(0x111111,{emissive:0x2ec4b6,emissiveIntensity:0.6}),0.45,1.83,0.55,tilt,false); // compteurs
     B(0.3,0.08,0.05,lamb(0x444444),0,2.24,0.68,tilt,false);       // rétroviseur
-    const wheelG=new THREE.Group();wheelG.position.set(0.45,1.76-0.9,0.36);wheelG.rotation.x=0.45;tilt.add(wheelG);
+    const wheelG=new THREE.Group();wheelG.position.set(0.45,1.68-0.9,0.17);wheelG.rotation.x=0.45;tilt.add(wheelG);
     const swheel=new THREE.Group();wheelG.add(swheel);this.swheel=swheel;
     swheel.add(new THREE.Mesh(new THREE.TorusGeometry(0.19,0.028,6,18),lamb(0x1d1d22)));
     const spoke=new THREE.Mesh(new THREE.BoxGeometry(0.36,0.035,0.03),lamb(0x2a2a30));swheel.add(spoke);
     const spoke2=new THREE.Mesh(new THREE.BoxGeometry(0.035,0.19,0.03),lamb(0x2a2a30));spoke2.position.y=-0.09;swheel.add(spoke2);
     const hub=new THREE.Mesh(new THREE.CylinderGeometry(0.04,0.04,0.05,10),lamb(this.color));hub.rotation.x=Math.PI/2;swheel.add(hub);
-    const column=new THREE.Mesh(new THREE.CylinderGeometry(0.035,0.035,0.4,6),lamb(0x1d1d22));column.rotation.x=Math.PI/2;column.position.z=0.2;wheelG.add(column);
+    const column=new THREE.Mesh(new THREE.CylinderGeometry(0.035,0.035,0.4,6),lamb(0x1d1d22));column.rotation.x=Math.PI/2;column.scale.y=1.4;column.position.z=0.28;wheelG.add(column);
     // mains (gants) sur le volant à 10 h 10, avec avant-bras qui suivent
     const glove=lamb(0x2b2d36);this.hands=[];this.arms=[];
     for(const sx of [1,-1]){
@@ -55043,10 +55044,25 @@ function sendCB(car,i,fromNet=false){
   sayHuman(msg,{radio:true,rate:car===(players[0]&&players[0].car)?1.0:0.9});
   if(!fromNet){netSend({t:'cb',i});const p=playerOfCar(car);if(p)mission(p,'cb');}
 }
+/* ---------- souris : regard verrouillé (clic droit / Alt), toujours débloquable (Échap, Alt, clic droit) ---------- */
+const MLOCK={on:false};
+function mouseLock(v){const el=renderer.domElement;
+  if(v){if(!started||paused||TOUCH.on||!el.requestPointerLock)return;try{const r=el.requestPointerLock();if(r&&r.catch)r.catch(()=>{});}catch(_){}}
+  else if(document.pointerLockElement){try{document.exitPointerLock();}catch(_){}}}
+document.addEventListener('pointerlockchange',()=>{const was=MLOCK.on;MLOCK.on=document.pointerLockElement===renderer.domElement;
+  document.body.classList.toggle('mlock',MLOCK.on);
+  if(MLOCK.on&&!was)toast('🖱️ Regard à la souris — Échap, Alt ou clic droit pour libérer la souris');
+  else if(!MLOCK.on&&was)toast('🖱️ Souris libérée');});
+renderer.domElement.addEventListener('mousedown',e=>{if(e.button===2&&started&&!paused){e.preventDefault();mouseLock(!MLOCK.on);}});
+addEventListener('keydown',e=>{if((e.key==='Alt'||e.code==='AltLeft'||e.code==='AltRight')&&started&&!paused){e.preventDefault();mouseLock(!MLOCK.on);}});
+addEventListener('blur',()=>mouseLock(false));
+document.addEventListener('mousemove',e=>{if(!MLOCK.on)return;const p=players[0];if(!p)return;
+  if(p.view===3)p.freeYaw-=e.movementX*0.0035;else p.oy-=e.movementX*0.0035;
+  p.op=clamp(p.op+e.movementY*0.0025,p.view===2?-0.9:-0.35,1.35);p.lookT=0;});
 /* ---------- souris : caméra libre ---------- */
 let drag=null;
 function playerAt(x){if(players.length<2)return players[0];return x<innerWidth/2?players[0]:players[1];}
-renderer.domElement.addEventListener('pointerdown',e=>{if(!started||paused)return;const p=playerAt(e.clientX);if(!p)return;drag={p,x:e.clientX,y:e.clientY,id:e.pointerId};try{renderer.domElement.setPointerCapture(e.pointerId);}catch(_){}});
+renderer.domElement.addEventListener('pointerdown',e=>{if(!started||paused||MLOCK.on||e.button===2)return;const p=playerAt(e.clientX);if(!p)return;drag={p,x:e.clientX,y:e.clientY,id:e.pointerId};try{renderer.domElement.setPointerCapture(e.pointerId);}catch(_){}});
 renderer.domElement.addEventListener('pointermove',e=>{
   if(drag&&drag.id===e.pointerId){const p=drag.p,dx=e.clientX-drag.x,dy=e.clientY-drag.y;drag.x=e.clientX;drag.y=e.clientY;
     if(p.view===3){p.freeYaw-=dx*0.006;}else p.oy-=dx*0.006;
@@ -56231,7 +56247,7 @@ function refreshTouch(){
    Aide des commandes : clavier / manette / tactile
    ========================================================= */
 const HELP={
-keys:`<div><b>🟠 Pilote 1</b><br><kbd>Z</kbd><kbd>Q</kbd><kbd>S</kbd><kbd>D</kbd> conduire (W A S D en QWERTY) · <kbd>Shift</kbd> gaz doux<br><kbd>Espace</kbd> frein à main · <kbd>E</kbd> klaxon · <kbd>F</kbd> phares<br><kbd>R</kbd> (maintenir) roue d'émotes · <kbd>A</kbd> changer de vue<br><kbd>T</kbd> treuil · <kbd>C</kbd> repère · <kbd>G</kbd> rejoindre le pote · <kbd>X</kbd> remettre d'aplomb<br><kbd>Tab</kbd> ou <kbd>0</kbd> ouvrir la portière et sortir / remonter · <kbd>7</kbd> 4L · <kbd>8</kbd> blocage · <kbd>9</kbd> warnings<br><kbd>1</kbd>…<kbd>6</kbd> messages radio</div>
+keys:`<div><b>🟠 Pilote 1</b><br><kbd>Z</kbd><kbd>Q</kbd><kbd>S</kbd><kbd>D</kbd> conduire (W A S D en QWERTY) · <kbd>Shift</kbd> gaz doux<br><kbd>Espace</kbd> frein à main · <kbd>E</kbd> klaxon · <kbd>F</kbd> phares<br><kbd>R</kbd> (maintenir) roue d'émotes · <kbd>A</kbd> changer de vue<br>🖱️ glisser = regarder · <kbd>Clic droit</kbd> ou <kbd>Alt</kbd> regard souris (<kbd>Échap</kbd> libère la souris) · en vue intérieure, clique sur l'écran du tableau de bord<br><kbd>T</kbd> treuil · <kbd>C</kbd> repère · <kbd>G</kbd> rejoindre le pote · <kbd>X</kbd> remettre d'aplomb<br><kbd>Tab</kbd> ou <kbd>0</kbd> ouvrir la portière et sortir / remonter · <kbd>7</kbd> 4L · <kbd>8</kbd> blocage · <kbd>9</kbd> warnings<br><kbd>1</kbd>…<kbd>6</kbd> messages radio</div>
 <div><b>🔵 Pilote 2</b><br><kbd>↑</kbd><kbd>←</kbd><kbd>↓</kbd><kbd>→</kbd> conduire · <kbd>Shift droit</kbd> frein à main<br><kbd>K</kbd> klaxon · <kbd>L</kbd> phares · <kbd>J</kbd> émotes · <kbd>Entrée</kbd> vue<br><kbd>O</kbd> treuil · <kbd>P</kbd> repère · <kbd>U</kbd> rejoindre · <kbd>I</kbd> aplomb<br><kbd>Retour arrière</kbd> ou pavé num. <kbd>.</kbd> portière : sortir / remonter · <kbd>7</kbd><kbd>8</kbd><kbd>9</kbd> 4L / blocage / warnings · <kbd>1</kbd>…<kbd>6</kbd> radio</div>
 <div><b>📻 Pour les deux</b><br><kbd>V</kbd> (maintenir) parler en ligne · 🎙️ micro ouvert<br><kbd>M</kbd> grande carte + GPS · <kbd>B</kbd> défi course · <kbd>N</kbd> musique<br>🖱️ clic-glisser : caméra · molette : zoom · <kbd>H</kbd> cacher l'interface · <kbd>F2</kbd> photo · <kbd>Échap</kbd> pause</div>
 <div><b>⭐ À faire</b><br>Balises, missions, drifts, sauts = XP + 💰 pièces.<br>🔧 Garage (près du départ) : acheter des véhicules, livraisons 📦.<br>⚠️ Zone PRO (sud-est) : parcours chronométré · 🌙 la nuit : camping ⛺🔥</div>`,
@@ -56468,58 +56484,102 @@ function collideCars(){
 }
 
 /* =========================================================
-   Tableau de bord interactif (vue intérieure) : fin, en bas, cliquable
+   Tableau de bord intégré à la voiture (vue intérieure) :
+   bloc compteurs derrière le volant + écran tactile au centre de la planche
    ========================================================= */
 const CD_BTNS=[
-  ['lights','💡','Phares','F'],['low','🐢','4L','7'],['lock','🔒','Blocage','8'],['hazard','⚠️','Warnings','9'],['park','🅿️','Frein','P'],
-  ['door','🚪','Sortir','0'],['horn','📯','Klaxon','E'],['map','🗺️','Carte','M'],['cb','📻','Radio CB','V'],['gps','🧭','GPS ✖',''],['music','🎵','Musique','N'],
+  ['lights','💡','Phares'],['low','🐢','4L'],['lock','🔒','Blocage'],['hazard','⚠️','Warnings'],['park','🅿️','Frein'],['door','🚪','Sortir'],
+  ['horn','📯','Klaxon'],['map','🗺️','Carte'],['cb','📻','Radio CB'],['gps','🧭','GPS ✖'],['music','🎵','Musique'],['cam','🎥','Vue'],
 ];
+const CD={grp:null,scr:null,clu:null,sc:null,cc:null,st:null,ct:null,hover:-1,press:-1,pressT:0,car:null};
 function setupCockpitDash(){
-  const box=document.getElementById('cdBtns');
-  box.innerHTML=CD_BTNS.map(b=>`<button data-a="${b[0]}" title="${b[2]}${b[3]?' ('+b[3]+')':''}"><span>${b[1]}</span><small>${b[2]}</small></button>`).join('');
-  box.querySelectorAll('button').forEach(btn=>{
-    const a=btn.dataset.a;
-    if(a==='horn'){btn.addEventListener('pointerdown',e=>{e.preventDefault();const p=players[0];if(p)hornDown(p);});
-      const up=()=>{const p=players[0];if(p)p.car.horn=false;};btn.addEventListener('pointerup',up);btn.addEventListener('pointerleave',up);return;}
-    btn.addEventListener('click',e=>{e.preventDefault();initAudio();const p=players[0];if(!p)return;const c=p.car;
-      if(a==='park'){c.park=!c.park;blip(c.park?[220,160]:[160,240],0.08,'square',0.07,0.05);toast(c.park?'🅿️ Frein à main serré':'🅿️ Frein à main desserré');}
-      else if(a==='map')toggleBigMap();
-      else if(a==='cb')toggleMic();
-      else if(a==='gps'){setGPS(null);toast('🧭 GPS effacé');}
-      else if(a==='music'){setStation(Radio.st+1);toast(`🎵 ${STATIONS[Radio.st].name}`);}
-      else doAction(p,a);
-      btn.blur();});
-  });
+  const mk=(w,h)=>{const c=document.createElement('canvas');c.width=w;c.height=h;const t=new THREE.CanvasTexture(c);t.colorSpace=THREE.SRGBColorSpace;t.anisotropy=4;return[c,t];};
+  [CD.sc,CD.st]=mk(640,300);[CD.cc,CD.ct]=mk(400,150);
+  const g=new THREE.Group();CD.grp=g;
+  const frame=lamb(0x15171d);
+  // écran central, encastré dans la planche, incliné vers le pilote
+  const sg=new THREE.Group();sg.position.set(-0.11,0.9,0.27);sg.rotation.set(-0.3,Math.PI-0.3,0,'YXZ');g.add(sg);
+  const sb=new THREE.Mesh(new THREE.BoxGeometry(0.5,0.25,0.04),frame);sb.position.z=-0.025;sg.add(sb);
+  CD.scr=new THREE.Mesh(new THREE.PlaneGeometry(0.46,0.216),new THREE.MeshBasicMaterial({map:CD.st,toneMapped:false}));CD.scr.position.z=-0.004;sg.add(CD.scr);
+  // bloc compteurs (casquette) au-dessus de la colonne, visible par-dessus le volant
+  const cg=new THREE.Group();cg.position.set(0.45,1.02,0.36);cg.rotation.set(-0.25,Math.PI,0,'YXZ');g.add(cg);
+  const hood=new THREE.Mesh(new THREE.BoxGeometry(0.4,0.025,0.1),frame);hood.position.set(0,0.08,0.04);cg.add(hood);
+  const cb=new THREE.Mesh(new THREE.BoxGeometry(0.4,0.16,0.04),frame);cb.position.z=-0.025;cg.add(cb);
+  CD.clu=new THREE.Mesh(new THREE.PlaneGeometry(0.36,0.135),new THREE.MeshBasicMaterial({map:CD.ct,toneMapped:false}));CD.clu.position.z=-0.004;cg.add(CD.clu);
+  g.visible=false;
+  // clic / survol de l'écran tactile
+  const ray=new THREE.Raycaster(),ndc=new THREE.Vector2();
+  const cellAt=e=>{if(!CD.grp.visible||!players[0])return -1;const rc=renderer.domElement.getBoundingClientRect();
+    if(MLOCK.on)ndc.set(0,0);else ndc.set((e.clientX-rc.left)/rc.width*2-1,-(e.clientY-rc.top)/rc.height*2+1);ray.setFromCamera(ndc,players[0].cam);
+    const h=ray.intersectObject(CD.scr,false)[0];if(!h||!h.uv)return -1;const u=h.uv.x,v=1-h.uv.y;
+    if(v<0.24)return -1;const col=Math.floor(u*6),row=Math.floor((v-0.24)/0.38);return(row>=0&&row<2&&col>=0&&col<6)?row*6+col:-1;};
+  renderer.domElement.addEventListener('pointerdown',e=>{if(e.button!==0)return;const i=cellAt(e);if(i<0)return;e.stopImmediatePropagation();e.preventDefault();cdPress(i);},true);
+  renderer.domElement.addEventListener('pointermove',e=>{const i=cellAt(e);if(i!==CD.hover){CD.hover=i;if(!MLOCK.on)renderer.domElement.style.cursor=i>=0?'pointer':'';cdDraw(true);}});
+  addEventListener('pointerup',()=>{const p=players[0];if(p&&CD.press===6)p.car.horn=false;});
+}
+function cdPress(i){
+  initAudio();const p=players[0];if(!p)return;const c=p.car,a=CD_BTNS[i][0];CD.press=i;CD.pressT=0.25;
+  blip([520],0.04,'sine',0.05,0.02);
+  if(a==='horn')hornDown(p);
+  else if(a==='park'){c.park=!c.park;blip(c.park?[220,160]:[160,240],0.08,'square',0.07,0.05);toast(c.park?'🅿️ Frein à main serré':'🅿️ Frein à main desserré');}
+  else if(a==='map')toggleBigMap();
+  else if(a==='cb')toggleMic();
+  else if(a==='gps'){setGPS(null);toast('🧭 GPS effacé');}
+  else if(a==='music'){setStation(Radio.st+1);toast(`🎵 ${STATIONS[Radio.st].name}`);}
+  else doAction(p,a);
+  cdDraw(true);
 }
 let cdT=0;
-function cockpitDashTick(dt){
-  const el=document.getElementById('cdash');
-  const p=players[0],show=started&&!paused&&players.length===1&&p&&p.view===2&&!p.onFoot&&!p.footAnim&&!TOUCH.on;
-  if(el.hidden===show)el.hidden=!show;document.body.classList.toggle('cockpit',show);
-  if(!show)return;
-  cdT-=dt;if(cdT>0)return;cdT=0.08;
-  const c=p.car,on={lights:c.lightMode>0,low:c.low,lock:c.lock,hazard:c.hazard,park:c.park,door:(c.doorOpen||0)>0.3,horn:c.horn,map:bigMapOpen,cb:!!(Net.stream&&Net.talking),gps:!!GPS,music:!STATIONS[Radio.st].off};
-  document.querySelectorAll('#cdBtns button').forEach(b=>{b.classList.toggle('on',!!on[b.dataset.a]);if(b.dataset.a==='lights')b.querySelector('span').textContent=c.lightMode===2?'🔆':'💡';});
-  // compteur à aiguille
-  const sp=Math.abs(c.vf)*3.6,cv=document.getElementById('cdSpeed'),x=cv.getContext('2d'),W=cv.width,H=cv.height,cx=W/2,cy=H*0.86,R=H*0.72;
-  x.clearRect(0,0,W,H);x.lineWidth=10;x.strokeStyle='rgba(255,255,255,.15)';x.beginPath();x.arc(cx,cy,R,Math.PI,0);x.stroke();
-  const f=Math.min(1,sp/140);x.strokeStyle=f>0.8?'#e63946':'#ffd23f';x.beginPath();x.arc(cx,cy,R,Math.PI,Math.PI+Math.PI*f);x.stroke();
-  for(let k=0;k<=7;k++){const a=Math.PI+Math.PI*k/7;x.strokeStyle='rgba(255,255,255,.6)';x.lineWidth=2;x.beginPath();x.moveTo(cx+Math.cos(a)*(R-14),cy+Math.sin(a)*(R-14));x.lineTo(cx+Math.cos(a)*(R-6),cy+Math.sin(a)*(R-6));x.stroke();}
-  const na=Math.PI+Math.PI*f;x.strokeStyle='#ff8a3d';x.lineWidth=4;x.beginPath();x.moveTo(cx,cy);x.lineTo(cx+Math.cos(na)*(R-10),cy+Math.sin(na)*(R-10));x.stroke();
-  x.fillStyle='#fff';x.font='900 30px "Trebuchet MS",sans-serif';x.textAlign='center';x.textBaseline='alphabetic';x.fillText(Math.round(sp),cx,cy-14);
-  x.font='800 11px "Trebuchet MS",sans-serif';x.fillStyle='rgba(255,255,255,.7)';const span=c.low?4:8.5,gear=Math.min(5,Math.floor(Math.abs(c.vf)/span));
-  x.fillText(`km/h · ${c.low?'4L':'4H'} · ${c.vf<-0.5?'R':gear+1}`,cx,cy+2);
-  // inclinomètre : tangage (avant/arrière) et dévers (côté)
-  const ci=document.getElementById('cdIncl'),y=ci.getContext('2d'),w2=ci.width,h2=ci.height;y.clearRect(0,0,w2,h2);
+function cdState(c){return{lights:c.lightMode>0,low:c.low,lock:c.lock,hazard:c.hazard,park:c.park,door:(c.doorOpen||0)>0.3,horn:c.horn,map:bigMapOpen,cb:!!(Net.stream&&Net.talking),gps:!!GPS,music:!STATIONS[Radio.st].off,cam:false};}
+function cdRR(x,X,Y,W,H,R){x.beginPath();x.moveTo(X+R,Y);x.arcTo(X+W,Y,X+W,Y+H,R);x.arcTo(X+W,Y+H,X,Y+H,R);x.arcTo(X,Y+H,X,Y,R);x.arcTo(X,Y,X+W,Y,R);x.closePath();}
+function cdDraw(force){
+  const p=players[0];if(!p||!CD.sc)return;const c=p.car;
+  // ----- écran central -----
+  const x=CD.sc.getContext('2d'),W=CD.sc.width,H=CD.sc.height,on=cdState(c);
+  const bg=x.createLinearGradient(0,0,0,H);bg.addColorStop(0,'#1b2233');bg.addColorStop(1,'#0e121b');x.fillStyle=bg;x.fillRect(0,0,W,H);
+  // bandeau : boussole, mode de transmission, pente / dévers
+  const hd=((-c.yaw*57.3)%360+540)%360,dirs=['N','NE','E','SE','S','SO','O','NO'],dir=dirs[Math.round(hd/45)%8];
   const pd=Math.round(-c.pitch*57.3),rd=Math.round(c.roll*57.3),danger=Math.abs(rd)>28||Math.abs(pd)>32;
-  const drawIcon=(ox,ang,side)=>{y.save();y.translate(ox,h2*0.5);y.rotate(ang);y.fillStyle=danger?'#e63946':'#2ec4b6';y.strokeStyle='#fff';y.lineWidth=2;
-    if(side){y.fillRect(-26,-8,52,14);y.strokeRect(-26,-8,52,14);y.fillRect(-14,-18,26,10);y.beginPath();y.arc(-15,8,6,0,7);y.arc(15,8,6,0,7);y.fill();}
-    else{y.fillRect(-18,-10,36,16);y.strokeRect(-18,-10,36,16);y.fillRect(-12,-19,24,9);y.beginPath();y.arc(-12,8,6,0,7);y.arc(12,8,6,0,7);y.fill();}
-    y.restore();y.strokeStyle='rgba(255,255,255,.25)';y.beginPath();y.moveTo(ox-34,h2*0.5+14);y.lineTo(ox+34,h2*0.5+14);y.stroke();};
-  drawIcon(w2*0.27,c.pitch,true);drawIcon(w2*0.73,-c.roll,false);
-  y.fillStyle=danger?'#ff6b6b':'#fff';y.font='900 13px "Trebuchet MS",sans-serif';y.textAlign='center';y.fillText(`${pd}°`,w2*0.27,h2*0.92);y.fillText(`${rd}°`,w2*0.73,h2*0.92);
-  y.font='800 9px "Trebuchet MS",sans-serif';y.fillStyle='rgba(255,255,255,.7)';y.fillText('PENTE',w2*0.27,h2*0.14);y.fillText('DÉVERS',w2*0.73,h2*0.14);
+  x.fillStyle='rgba(255,255,255,.06)';x.fillRect(0,0,W,68);
+  x.textBaseline='middle';x.textAlign='left';x.font='900 30px "Trebuchet MS",sans-serif';x.fillStyle='#ffd23f';x.fillText(`🧭 ${dir}`,16,36);
+  x.textAlign='center';x.fillStyle=c.low?'#ff8a3d':'#2ec4b6';x.fillText(c.low?'4L':'4H',W*0.40,36);
+  x.font='800 22px "Trebuchet MS",sans-serif';x.fillStyle=danger?'#ff6b6b':'#fff';x.textAlign='right';x.fillText(`PENTE ${pd}°   DÉVERS ${rd}°`,W-16,36);
   if(danger&&!c._tipWarn){c._tipWarn=true;toast('⚠️ Ça penche beaucoup : attention à ne pas basculer !');setTimeout(()=>{c._tipWarn=false;},6000);}
+  // boutons tactiles 6 x 2
+  const cw=W/6,top=H*0.24,ch=(H-top)/2;
+  CD_BTNS.forEach((b,i)=>{const col=i%6,row=(i/6)|0,X=col*cw+6,Y=top+row*ch+6,w=cw-12,h=ch-12,act=!!on[b[0]],hov=i===CD.hover,pr=i===CD.press&&CD.pressT>0;
+    cdRR(x,X,Y,w,h,14);x.fillStyle=act?'#ffd23f':pr?'rgba(255,255,255,.35)':hov?'rgba(255,255,255,.18)':'rgba(255,255,255,.08)';x.fill();
+    x.lineWidth=3;x.strokeStyle=act?'#ffe98a':hov?'#fff':'rgba(255,255,255,.22)';x.stroke();
+    x.textAlign='center';x.font='38px serif';x.fillStyle='#fff';x.fillText(b[0]==='lights'&&c.lightMode===2?'🔆':b[1],X+w/2,Y+h*0.40);
+    x.font='800 17px "Trebuchet MS",sans-serif';x.fillStyle=act?'#1d2433':'rgba(255,255,255,.9)';x.fillText(b[2],X+w/2,Y+h*0.80);});
+  CD.st.needsUpdate=true;
+  // ----- bloc compteurs -----
+  const y=CD.cc.getContext('2d'),w2=CD.cc.width,h2=CD.cc.height;
+  y.fillStyle='#0d1018';y.fillRect(0,0,w2,h2);
+  const sp=Math.abs(c.vf)*3.6,cx=w2/2,cy=h2*0.9,R=h2*0.74,f=Math.min(1,sp/140);
+  y.lineWidth=12;y.strokeStyle='rgba(255,255,255,.12)';y.beginPath();y.arc(cx,cy,R,Math.PI,0);y.stroke();
+  y.strokeStyle=f>0.8?'#e63946':'#ffd23f';y.beginPath();y.arc(cx,cy,R,Math.PI,Math.PI+Math.PI*f);y.stroke();
+  for(let k=0;k<=7;k++){const a=Math.PI+Math.PI*k/7;y.strokeStyle='rgba(255,255,255,.6)';y.lineWidth=2;y.beginPath();y.moveTo(cx+Math.cos(a)*(R-18),cy+Math.sin(a)*(R-18));y.lineTo(cx+Math.cos(a)*(R-8),cy+Math.sin(a)*(R-8));y.stroke();}
+  const na=Math.PI+Math.PI*f;y.strokeStyle='#ff8a3d';y.lineWidth=5;y.beginPath();y.moveTo(cx,cy);y.lineTo(cx+Math.cos(na)*(R-12),cy+Math.sin(na)*(R-12));y.stroke();
+  y.fillStyle='#fff';y.textAlign='center';y.textBaseline='alphabetic';y.font='900 40px "Trebuchet MS",sans-serif';y.fillText(Math.round(sp),cx,cy-26);
+  const span=c.low?4:8.5,gear=Math.min(5,Math.floor(Math.abs(c.vf)/span));
+  y.font='800 15px "Trebuchet MS",sans-serif';y.fillStyle='rgba(255,255,255,.75)';y.fillText(`km/h · ${c.vf<-0.5?'R':gear+1}`,cx,cy-6);
+  // voyants à gauche et à droite
+  const lamps=[[c.park,'🅿️','#e63946'],[c.lightMode===1,'💡','#2ec4b6'],[c.lightMode===2,'🔆','#4d9fff'],[c.hazard&&(performance.now()/400|0)%2===0,'⚠️','#ff8a3d'],[c.low,'4L','#ff8a3d'],[c.lock,'🔒','#ffd23f']];
+  lamps.forEach(([lit,ic,col],i)=>{const lx=i<3?34:w2-34,ly=30+(i%3)*42;y.globalAlpha=lit?1:0.18;y.beginPath();y.arc(lx,ly,17,0,7);y.fillStyle=lit?col:'#555';y.fill();
+    y.fillStyle='#fff';y.font=ic.length>2?'20px serif':'900 15px "Trebuchet MS",sans-serif';y.textBaseline='middle';y.fillText(ic,lx,ly+1);y.textBaseline='alphabetic';y.globalAlpha=1;});
+  CD.ct.needsUpdate=true;
+}
+function cockpitDashTick(dt){
+  const el=document.getElementById('cdash');if(el&&!el.hidden)el.hidden=true;
+  const p=players[0],show=!!(started&&!paused&&players.length===1&&p&&p.view===2&&!p.onFoot&&!p.footAnim);
+  document.body.classList.toggle('cockpit',show);
+  if(!CD.grp)return;
+  if(show&&CD.grp.parent!==p.car.tilt){p.car.tilt.add(CD.grp);}
+  CD.grp.visible=show;
+  if(!show){if(CD.hover>=0){CD.hover=-1;renderer.domElement.style.cursor='';}return;}
+  if(CD.pressT>0){CD.pressT-=dt;if(CD.pressT<=0)CD.press=CD.press===6&&p.car.horn?6:-1;}
+  cdT-=dt;if(cdT>0)return;cdT=0.1;cdDraw();
 }
 
 /* =========================================================
@@ -56742,7 +56802,7 @@ function cleanup(){
   Winch.on=false;Race.active=false;raceFlag.visible=false;lobby(null);
 }
 function togglePause(){
-  if(!started)return;paused=!paused;if(paused)renderHelp();
+  if(!started)return;paused=!paused;if(paused){renderHelp();mouseLock(false);}
   if(paused){const gr=document.getElementById('pGroupRow');gr.style.display=(Net.peer&&players.length===1)?'block':'none';renderGroups();}
   if(paused){const pc=document.getElementById('pCode');pc.hidden=!Net.code||!Net.peer;document.getElementById('pCodeV').textContent=Net.code||'';}document.getElementById('pause').hidden=!paused;if(paused)refreshGarage();else document.getElementById('admin').hidden=true;cgGameplay(!paused);
   if(AC){if(paused)radioBus.gain.setTargetAtTime(Radio.vol*0.2,AC.currentTime,0.1);else radioBus.gain.setTargetAtTime(Radio.vol*0.55,AC.currentTime,0.1);}
