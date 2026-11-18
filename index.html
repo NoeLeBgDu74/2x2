@@ -53346,6 +53346,7 @@ async function cgInit(){
       await Promise.race([CG.sdk.init(),new Promise((_,rej)=>setTimeout(()=>rej('timeout'),4000))]);
       if(CG.sdk.environment==='disabled')throw 'off';
       CG.ok = true;
+      try{const apply=st=>{CG.muted=!!(st&&st.muteAudio);if(master)master.gain.value=CG.muted?0:store.get('mvol',80)/100;};apply(CG.sdk.game.settings);CG.sdk.game.addSettingsChangeListener(apply);}catch(e){}
       try{ CG.sdk.game.loadingStart(); }catch(e){}
     }
   }catch(e){ CG.ok=false; }
@@ -53376,7 +53377,14 @@ function vnoise(x,z,s=0){const i=Math.floor(x),j=Math.floor(z);const fx=x-i,fz=z
 function fbm(x,z,o=5,s=0){let t=0,a=0.5,f=1,n=0;for(let k=0;k<o;k++){t+=a*vnoise(x*f,z*f,s+k*17);n+=a;a*=0.5;f*=2.03;}return t/n;}
 function catmull(p0,p1,p2,p3,t){const t2=t*t,t3=t2*t;const f=(a,b,c,d)=>0.5*((2*b)+(-a+c)*t+(2*a-5*b+4*c-d)*t2+(-a+3*b-3*c+d)*t3);return [f(p0[0],p1[0],p2[0],p3[0]),f(p0[1],p1[1],p2[1],p3[1])];}
 function hexRGB(h){return [((h>>16)&255)/255,((h>>8)&255)/255,(h&255)/255];}
-const store={get(k,d){try{const v=localStorage.getItem('duopiste_'+k);return v===null?d:JSON.parse(v);}catch(e){return d;}},set(k,v){try{localStorage.setItem('duopiste_'+k,JSON.stringify(v));}catch(e){}}};
+// sauvegarde : module Data du SDK CrazyGames sur CrazyGames (progression liée au compte), sinon localStorage
+const _sdkData=()=>(CG.ok&&CG.sdk&&CG.sdk.data)?CG.sdk.data:null;
+const store={
+  get(k,d){const key='duopiste_'+k;let v=null;try{const S=_sdkData();if(S)v=S.getItem(key);}catch(e){}
+    if(v===null||v===undefined){try{v=localStorage.getItem(key);}catch(e){}}
+    if(v===null||v===undefined)return d;try{return JSON.parse(v);}catch(e){return d;}},
+  set(k,v){const key='duopiste_'+k,j=JSON.stringify(v);try{const S=_sdkData();if(S)S.setItem(key,j);}catch(e){}try{localStorage.setItem(key,j);}catch(e){}}
+};
 /* =========================================================
    Langue : français ou anglais (anglais par défaut hors navigateurs français).
    La traduction s'applique à l'affichage : textes de la page, messages,
@@ -54128,7 +54136,7 @@ function initAudio(){
   if(AC)return;
   try{AC=new (window.AudioContext||window.webkitAudioContext)();}catch(e){return;}
   const comp=AC.createDynamicsCompressor();comp.threshold.value=-14;comp.ratio.value=4;comp.connect(AC.destination);
-  master=AC.createGain();master.gain.value=store.get('mvol',80)/100;master.connect(comp);
+  master=AC.createGain();master.gain.value=CG.muted?0:store.get('mvol',80)/100;master.connect(comp);
   sfxBus=AC.createGain();sfxBus.connect(master);
   radioFilter=AC.createBiquadFilter();radioFilter.type='highshelf';radioFilter.frequency.value=6000;radioFilter.gain.value=-4;radioFilter.connect(master);
   radioBus=AC.createGain();radioBus.gain.value=Radio.vol*0.55;radioBus.connect(radioFilter);
