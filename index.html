@@ -56693,6 +56693,10 @@ async function loaderTransition(msg,ms=1400){
   // installable comme une appli (pas dans CrazyGames ni en fichier local)
   if('serviceWorker' in navigator&&location.protocol==='https:'&&window.top===window&&!CG.ok){navigator.serviceWorker.register('sw.js').catch(()=>{});}
   const room=cgInviteParam('room');if(room){document.getElementById('jCode').value=room.toUpperCase();}
+  // CrazyGames : lien d'invitation = on rejoint directement ; « instant multiplayer » = on crée la partie directement
+  let instant=false;try{instant=CG.ok&&!!CG.sdk.game.isInstantMultiplayer;}catch(e){}
+  if(room&&room.length===4)setTimeout(()=>askNick('join'),500);
+  else if(instant)setTimeout(()=>askNick('host'),500);
   refreshAppBtns();
   try{const md=new URLSearchParams(location.search).get('mode');if(md==='solo'||md==='host'||md==='split')setTimeout(()=>askNick(md),400);}catch(e){}
   openMenu();
