@@ -276,7 +276,7 @@ body.mlock::after{content:'';position:fixed;left:50%;top:50%;width:8px;height:8p
   <div class="row" id="pGroupRow" style="display:none">👥 <b>Groupes</b> <small style="opacity:.7">(la radio, le GPS et le convoi marchent avec ton groupe)</small><div id="pGroups"></div></div>
   <div class="row" style="display:block">🚙 <b>Mes véhicules</b> <small style="opacity:.7">(achète-en d'autres au 🔧 garage près du départ)</small><div id="pGarage"></div></div>
   <div class="row">🎵 Musique <select id="mStation"></select> <input id="rVol" type="range" min="0" max="100" value="55"></div>
-  <div class="row appRow"><button class="big b4" id="bPhoto">📸 Photo (F2)</button><button class="big b4" id="bFull2">⛶ Plein écran</button><button class="big b4" id="bShare2">🔗 Partager</button></div>
+  <div class="row appRow"><button class="big b4" id="bPhoto">📸 Photo (F2)</button><button class="big b4" id="bFull2">⛶ Plein écran</button><button class="big b4" id="bShare2">🔗 Partager</button><button class="big b4" id="bVR" hidden style="display:none">🥽 Casque VR</button></div>
   <div class="row"><button class="big b4" id="bTuto" style="padding:6px 12px;font-size:15px">🎓 Revoir le tuto</button> <button class="big b4" id="bTime" style="padding:6px 12px;font-size:15px">⏰ Avancer l'heure</button></div>
   <div class="row">🎨 Qualité <select id="quality"><option value="2">Haute</option><option value="1" selected>Normale</option><option value="0">Rapide</option></select></div>
   <div class="keys" id="keysHelp2"></div>
@@ -53417,7 +53417,7 @@ const EN_PAIRS=[
 ['Ton pseudo doit faire au moins 2 lettres','Your nickname needs at least 2 letters'],['Le pseudo du pilote 2 doit faire au moins 2 lettres',"Driver 2's nickname needs at least 2 letters"],['Choisissez deux pseudos différents','Pick two different nicknames'],
 ['Entre le code à 4 caractères de ton pote',"Enter your buddy's 4-character code"],['Rejoindre la partie','Join the game'],['Deux joueurs','Two players'],
 // --- pause ---
-['PAUSE','PAUSE'],['Volume général','Master volume'],['Regard à la souris — Échap, Alt ou clic droit pour libérer la souris','Mouse look — Esc, Alt or right-click to free the mouse'],['Souris libérée','Mouse freed'],['Musique','Music'],['Vue','View'],['Avancer l\'heure','Skip time'],["Avancer l'heure",'Skip time'],['Qualité','Quality'],['Haute','High'],['Normale','Normal'],['Rapide','Fast'],
+['PAUSE','PAUSE'],['Volume général','Master volume'],['Regard à la souris — Échap, Alt ou clic droit pour libérer la souris','Mouse look — Esc, Alt or right-click to free the mouse'],['Souris libérée','Mouse freed'],['Casque VR','VR headset'],["Lance d'abord une partie (solo ou en ligne)",'Start a game first (solo or online)'],['Le casque VR marche en solo ou en ligne (pas en écran partagé)','VR works in solo or online (not split screen)'],['Mode VR : gâchette droite = gaz · gauche = frein · stick = volant · laser + gâchette = écran','VR mode: right trigger = gas · left = brake · stick = steer · laser + trigger = screen'],['Impossible de lancer la VR sur cet appareil','Cannot start VR on this device'],['Mode VR terminé','VR mode ended'],['Vue recentrée','View recentered'],['Reste au volant en VR','Stay at the wheel in VR'],['Musique','Music'],['Vue','View'],['Avancer l\'heure','Skip time'],["Avancer l'heure",'Skip time'],['Qualité','Quality'],['Haute','High'],['Normale','Normal'],['Rapide','Fast'],
 ['Reprendre','Resume'],['Menu principal','Main menu'],['Mes véhicules','My vehicles'],["achète-en d'autres au 🔧 garage près du départ",'buy more at the 🔧 garage near the start'],['Revoir le tuto','Replay tutorial'],
 ['Photo (F2)','Photo (F2)'],['Partager','Share'],['Code de la partie','Game code'],['Copier le lien','Copy link'],['Radio coupée','Radio off'],
 // --- aide ---
@@ -55092,6 +55092,7 @@ function pollInput(p){
     if(p.onFoot){p._pf={f:-(Math.abs(gp.axes[1]||0)>0.15?gp.axes[1]:0),s:-(Math.abs(gp.axes[0]||0)>0.15?gp.axes[0]:0)};}
     edge(12,()=>sendCB(p.car,0));edge(13,()=>sendCB(p.car,1));edge(14,()=>sendCB(p.car,2));edge(15,()=>sendCB(p.car,5));edge(9,()=>togglePause());
   }
+  {const vi=vrInput(p);if(vi){thr+=vi.thr;steer+=vi.steer;hand=hand||vi.hand;}}
   // roue d'émotes ouverte : le volant/stick choisit l'émote, la voiture continue tout droit
   if(p.wheelOpen){
     p.wheelT+=1/60;
@@ -56124,6 +56125,7 @@ function doorWorld(car){_fq.set(1.9,0,0.15);_fq.applyAxisAngle(_UP,car.yaw);retu
 function seatWorld(car,out){car.root.updateMatrixWorld(true);out.set(0.45,1.62-0.9,-0.45);car.tilt.localToWorld(out);return out;}
 function toggleFoot(p){
   const car=p.car;if(p.footAnim)return;
+  if(!p.onFoot&&typeof VR!=='undefined'&&VR.on&&p===players[0]){toast('🥽 Reste au volant en VR');return;}
   if(!p.onFoot){
     if(Math.hypot(car.vx,car.vz)>2.2){toast('🛑 Arrête-toi d\'abord pour sortir');return;}
     if(car.model==='buggy'||!car.door){startExit(p);return;}
@@ -56583,6 +56585,94 @@ function cockpitDashTick(dt){
 }
 
 /* =========================================================
+   Casque VR (WebXR) : on est assis au volant, la tête bouge pour de vrai,
+   manettes VR pour conduire, laser pour toucher l'écran du tableau de bord
+   ========================================================= */
+const VR={on:false,ok:false,session:null,rig:null,off:null,cam:null,ctrls:[],prev:{},recenter:false,oldLayer:1,_wp:new THREE.Vector3()};
+renderer.xr.enabled=true;renderer.xr.setReferenceSpaceType('local');
+function vrSetup(){
+  VR.rig=new THREE.Group();VR.off=new THREE.Group();VR.rig.add(VR.off);
+  VR.cam=new THREE.PerspectiveCamera(80,1,0.05,3200);VR.off.add(VR.cam);
+  const lineG=new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(0,0,0),new THREE.Vector3(0,0,-1)]);
+  for(let i=0;i<2;i++){const c=renderer.xr.getController(i);VR.off.add(c);
+    const ln=new THREE.Line(lineG,new THREE.LineBasicMaterial({color:0xffd23f,transparent:true,opacity:0.8}));ln.scale.z=0.7;ln.visible=false;c.add(ln);c.userData.line=ln;
+    const dot=new THREE.Mesh(new THREE.SphereGeometry(0.008,8,6),new THREE.MeshBasicMaterial({color:0xffd23f}));dot.visible=false;VR.off.add(dot);c.userData.dot=dot;
+    c.addEventListener('connected',e=>{c.userData.hand=e.data&&e.data.handedness;});
+    c.addEventListener('squeezestart',()=>{const i2=vrHit(c);if(i2>=0)cdPress(i2);});
+    c.addEventListener('selectstart',()=>{const i2=vrHit(c);if(i2>=0){c.userData.uiSel=true;cdPress(i2);}});
+    c.addEventListener('selectend',()=>{c.userData.uiSel=false;const p=players[0];if(p&&CD.press===6)p.car.horn=false;});
+    VR.ctrls.push(c);}
+  const btn=document.getElementById('bVR');
+  if(navigator.xr&&navigator.xr.isSessionSupported){navigator.xr.isSessionSupported('immersive-vr').then(ok=>{VR.ok=ok;btn.hidden=!ok;btn.style.display=ok?'':'none';}).catch(()=>{});}
+  btn.onclick=()=>{btn.blur();vrToggle();};
+}
+const _vrRay=new THREE.Raycaster(),_vrM=new THREE.Matrix4();
+function vrHit(c){
+  if(!CD.grp||!CD.grp.visible)return -1;
+  _vrM.identity().extractRotation(c.matrixWorld);_vrRay.ray.origin.setFromMatrixPosition(c.matrixWorld);_vrRay.ray.direction.set(0,0,-1).applyMatrix4(_vrM);
+  const h=_vrRay.intersectObject(CD.scr,false)[0];
+  if(!h||!h.uv||h.distance>1.6)return -1;const u=h.uv.x,v=1-h.uv.y;if(v<0.24)return -1;
+  const col=Math.floor(u*6),row=Math.floor((v-0.24)/0.38);return(row>=0&&row<2&&col>=0&&col<6)?row*6+col:-1;
+}
+async function vrToggle(){
+  if(VR.session){try{await VR.session.end();}catch(e){}return;}
+  if(!started){toast('🥽 Lance d\'abord une partie (solo ou en ligne)');return;}
+  if(players.length!==1){toast('🥽 Le casque VR marche en solo ou en ligne (pas en écran partagé)');return;}
+  try{
+    const s=await navigator.xr.requestSession('immersive-vr',{optionalFeatures:['local-floor']});
+    VR.session=s;s.addEventListener('end',vrEnd);
+    await renderer.xr.setSession(s);
+    VR.on=true;if(paused)togglePause();
+    const p=players[0];p.view=2;if(p.onFoot)toggleFoot(p);
+    VR.oldLayer=p.car.layerId||1;p.car.setLayer(5);     // la tête du pilote ne doit pas apparaître dans le casque
+    renderer.setScissorTest(false);
+    VR.recenter=true;
+    renderer.setAnimationLoop(frame);
+    toast('🥽 Mode VR : gâchette droite = gaz · gauche = frein · stick = volant · laser + gâchette = écran');
+  }catch(e){VR.session=null;toast('🥽 Impossible de lancer la VR sur cet appareil');}
+}
+function vrEnd(){
+  VR.on=false;VR.session=null;renderer.setAnimationLoop(null);renderer.setScissorTest(true);
+  const p=players[0];if(p)p.car.setLayer(VR.oldLayer);
+  if(VR.rig&&VR.rig.parent)VR.rig.parent.remove(VR.rig);
+  last=performance.now();requestAnimationFrame(frame);
+  toast('🥽 Mode VR terminé');
+}
+/* manettes VR → conduite */
+function vrInput(p){
+  if(!VR.on||!VR.session||p!==players[0])return null;
+  let thr=0,steer=0,hand=false;
+  for(const src of VR.session.inputSources){
+    const g=src.gamepad;if(!g)continue;const hd=src.handedness,b=i=>g.buttons[i]?g.buttons[i].value:0,pr=i=>!!(g.buttons[i]&&g.buttons[i].pressed);
+    const ctrl=VR.ctrls.find(c=>c.userData.hand===hd);
+    const uiSel=ctrl&&ctrl.userData.uiSel;
+    if(hd==='right'&&!uiSel)thr+=b(0);
+    if(hd==='left'&&!uiSel)thr-=b(0);
+    const ax=g.axes[2]||0;if(Math.abs(ax)>0.12)steer-=ax;
+    const key=hd+'_';
+    const edge=(i,fn,up)=>{const v=pr(i);if(v&&!VR.prev[key+i])fn();if(!v&&VR.prev[key+i]&&up)up();VR.prev[key+i]=v;};
+    edge(4,()=>{p.car.park=false;},null);if(pr(4))hand=true;                   // A / X : frein à main
+    edge(5,()=>hornDown(p),()=>{p.car.horn=false;});                          // B / Y : klaxon
+    edge(3,()=>{VR.recenter=true;toast('🥽 Vue recentrée');});                // clic du stick : recentrer
+  }
+  return{thr,steer,hand};
+}
+function vrFrame(p){
+  // place le « siège » VR à la tête du pilote, tourné vers l'avant du 4x4
+  const car=p.car;
+  if(VR.rig.parent!==car.tilt){car.tilt.add(VR.rig);VR.rig.position.set(0.45,2.16-0.9,-0.36);VR.rig.rotation.set(0,Math.PI,0);}
+  VR.ctrls.forEach(c=>{
+    const hit=vrHit(c);c.userData.line.visible=true;c.userData.line.material.opacity=hit>=0?1:0.35;c.userData.line.scale.z=hit>=0?0.9:0.35;});
+  if(VR.recenter){VR.recenter=false;
+    // la tête actuelle devient la place du pilote
+    const yaw=new THREE.Euler().setFromQuaternion(VR.cam.quaternion,'YXZ').y;
+    VR.off.rotation.y=-yaw;
+    const w=VR.cam.position.clone().applyAxisAngle(new THREE.Vector3(0,1,0),-yaw);
+    VR.off.position.set(-w.x,-w.y,-w.z);
+  }
+}
+
+/* =========================================================
    Boucle principale
    ========================================================= */
 const menuCam=new THREE.PerspectiveCamera(60,1,0.5,2600);
@@ -56634,18 +56724,20 @@ function updateCam(p,dt){
   else cam.lookAt(car.pos.x+Math.sin(car.yaw)*2.5,car.pos.y+1.7,car.pos.z+Math.cos(car.yaw)*2.5);
   const fov=62+Math.min(14,sp*0.35);if(Math.abs(cam.fov-fov)>0.05){cam.fov+=(fov-cam.fov)*Math.min(1,dt*3);cam.updateProjectionMatrix();}
 }
+const _cpw=new THREE.Vector3();
 function renderView(cam,r,focus){
   const pr=renderer.getPixelRatio();
   renderer.setViewport(r.x,innerHeight-r.y-r.h,r.w,r.h);renderer.setScissor(r.x,innerHeight-r.y-r.h,r.w,r.h);
   if(Math.abs(cam.aspect-r.w/r.h)>0.001){cam.aspect=r.w/r.h;cam.updateProjectionMatrix();}
-  sky.position.copy(cam.position);stars.position.copy(cam.position);
-  sunDisc.position.copy(cam.position).addScaledVector(sunDir,1800);moonDisc.position.copy(cam.position).addScaledVector(sunDir,-1800);
+  const cpos=cam.parent?cam.getWorldPosition(_cpw):cam.position;
+  sky.position.copy(cpos);stars.position.copy(cpos);
+  sunDisc.position.copy(cpos).addScaledVector(sunDir,1800);moonDisc.position.copy(cpos).addScaledVector(sunDir,-1800);
   sun.target.position.copy(focus);sun.position.copy(focus).addScaledVector(sunDir.y>0?sunDir:_v.copy(sunDir).negate(),220);
   FX.mat.uniforms.uScale.value=r.h*pr/(2*Math.tan(THREE.MathUtils.degToRad(cam.fov)/2));
   renderer.render(scene,cam);
 }
 function frame(now){
-  requestAnimationFrame(frame);
+  if(!VR.on)requestAnimationFrame(frame);
   let dt=Math.min(0.05,(now-last)/1000)*ADMIN.slowmo;last=now;
   updateSky(dt);
   if(!started){
@@ -56734,7 +56826,7 @@ function frame(now){
   if(players.length===2){
     const w=Math.floor(innerWidth/2);players[0].rect={x:0,y:0,w,h:innerHeight};players[1].rect={x:w,y:0,w:innerWidth-w,h:innerHeight};
   }else players[0].rect={x:0,y:0,w:innerWidth,h:innerHeight};
-  for(const p of players){updateCam(p,dt);renderView(p.cam,p.rect,p.car.pos);}
+  for(const p of players){updateCam(p,dt);if(VR.on&&p===players[0]){p.view=2;vrFrame(p);renderView(VR.cam,p.rect,p.car.pos);}else renderView(p.cam,p.rect,p.car.pos);}
   drawHUD();photoAfterRender();
   campHUD();tutoTick();refreshTouch();cockpitDashTick(dt);if(bigMapOpen&&(++bigMapTick%8===0))drawBigMap();
   fpsAcc=fpsAcc*0.95+(1/Math.max(0.001,(now-fpsLast)/1000))*0.05;fpsLast=now;
@@ -56825,7 +56917,7 @@ document.getElementById('bSolo').onclick=()=>askNick('solo');
 document.getElementById('bHost').onclick=()=>askNick('host');
 document.getElementById('bJoin').onclick=()=>{const v=document.getElementById('jCode').value.trim();if(v.length!==4){toast('Entre le code à 4 caractères de ton pote');return;}askNick('join');};
 document.getElementById('bResume').onclick=()=>togglePause();
-setupCockpitDash();
+setupCockpitDash();vrSetup();
 document.getElementById('bLang').textContent=LANG==='fr'?'🇬🇧 English':'🇫🇷 Français';document.getElementById('bLang').onclick=()=>setLang(LANG==='fr'?'en':'fr');
 document.getElementById('bInstall').onclick=doInstall;document.getElementById('bShare').onclick=shareGame;document.getElementById('bFull').onclick=toggleFullscreen;
 document.getElementById('bPhoto').onclick=()=>{togglePause();setTimeout(takePhoto,150);};document.getElementById('bFull2').onclick=toggleFullscreen;document.getElementById('bShare2').onclick=shareGame;
