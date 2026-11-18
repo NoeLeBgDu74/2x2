@@ -54635,7 +54635,7 @@ class Car{
   setLayer(n){this.layerId=n;for(const m of this.headParts)m.layers.set(n);if(this.driverCh)this.driverCh.setLayer(n);}
   setLook(l){this.look=Object.assign({},DEFAULT_LOOK,l||{});this.setModel(this.model);}
   setLevel(l){
-    this.lvl=l;if(this.cosG){this.tilt.remove(this.cosG);}if(this.neon){this.root.remove(this.neon);this.neon=null;}
+    this.lvl=l;if(this.cosG){this.tilt.remove(this.cosG);}if(this.neon){this.neon.parent&&this.neon.parent.remove(this.neon);this.neon=null;}
     const g=new THREE.Group();this.cosG=g;this.tilt.add(g);const has=id=>UNLOCKS.some(u=>u.id===id&&l>=u.lvl);
     const B=(w,h,d,m,x,y,z)=>{const me=new THREE.Mesh(new THREE.BoxGeometry(w,h,d),m);me.position.set(x,y-0.9,z);me.castShadow=true;g.add(me);return me;};
     this.beacon=null;
@@ -54644,7 +54644,14 @@ class Car{
     if(has('kayak')){const k=B(0.55,0.28,3.4,lamb(0xff5a36),0.35,2.85,-0.35);k.scale.x=0.9;B(0.32,0.1,0.7,lamb(0x222222),0.35,3.0,-0.35);}
     const big=has('monster')?1.15:1;this.wheelScale=big;this.wheels.forEach(w=>w.sp.scale.setScalar(big*w.base));
     this.rimM.color.setHex(has('gold')?0xffc94a:0xd9dde4);
-    if(has('neon')){const m=new THREE.Mesh(new THREE.PlaneGeometry(2.8,5),new THREE.MeshBasicMaterial({color:this.color,transparent:true,opacity:0.55,blending:THREE.AdditiveBlending,depthWrite:false}));m.rotation.x=-Math.PI/2;m.position.y=0.06;this.root.add(m);this.neon=m;}
+    if(has('neon')){
+      // néons fixés sous la caisse : ils suivent ses mouvements et restent sous le châssis
+      const ng=new THREE.Group();ng.position.y=0.7-0.9;this.tilt.add(ng);
+      const glow=new THREE.Mesh(new THREE.PlaneGeometry(2.3,4.4),new THREE.MeshBasicMaterial({color:this.color,transparent:true,opacity:0.5,blending:THREE.AdditiveBlending,depthWrite:false,side:THREE.DoubleSide}));glow.rotation.x=-Math.PI/2;ng.add(glow);
+      const tubeM=new THREE.MeshBasicMaterial({color:this.color});
+      for(const sx of [-1,1]){const t=new THREE.Mesh(new THREE.BoxGeometry(0.06,0.06,3.8),tubeM);t.position.set(sx*0.95,0.02,0);ng.add(t);}
+      for(const sz of [-1,1]){const t=new THREE.Mesh(new THREE.BoxGeometry(1.9,0.06,0.06),tubeM);t.position.set(0,0.02,sz*1.95);ng.add(t);}
+      this.neon=ng;this.neonGlow=glow;}
   }
   place(x,z,yaw){
     if(typeof Winch!=='undefined'&&Winch.on&&(Winch.car===this||(!Winch.anchor&&!this.npc&&!this.remote))){Winch.on=false;Winch.anchor=null;}
@@ -54804,7 +54811,7 @@ class Car{
     if(ADMIN.rainbow)this.mainM.color.setHSL((performance.now()/2000+(this.layerId||0)*0.3)%1,0.85,0.55);else if(this._rb!==false){this.mainM.color.setHex(this.color);}this._rb=ADMIN.rainbow;
     if(this.beacon){const on=Math.sin(performance.now()/90)>0;this.beaconM.emissiveIntensity=on?2.2:0.2;this.beacon.rotation.y+=dt*8;}
     if(this.cosG)this.cosG.children.forEach(m=>{if(m.userData.flag)m.rotation.y=Math.sin(performance.now()/150+m.position.x)*0.4;});
-    if(this.neon){this.neon.position.y=Math.max(0.06,heightAt(this.pos.x,this.pos.z)-this.pos.y+0.08);this.neon.material.opacity=0.35+nightF*0.4;}
+    if(this.neonGlow)this.neonGlow.material.opacity=0.3+nightF*0.45;
   }
   setModel(id){
     const x=this.pos.x,z=this.pos.z,yaw=this.yaw;scene.remove(this.root);this.model=id;this.build();this.setLayer(this.layerId||1);this.place(x,z,yaw);
