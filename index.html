@@ -232,7 +232,7 @@ body.mobile #rName{display:none}body.mobile #radio{gap:4px;padding:4px 6px}
    <div class="pcard"><b>Pilote 1</b><input id="n1" maxlength="14"><div class="sw" id="sw1"></div><div class="vehs" id="g1"></div><button class="cebtn" id="ce1">👤 Mon personnage</button><div class="lv" id="lv1"></div></div>
    <div class="pcard"><b>Pilote 2</b><input id="n2" maxlength="14"><div class="sw" id="sw2"></div><div class="vehs" id="g2"></div><button class="cebtn" id="ce2">👤 Son personnage</button><div class="lv" id="lv2"></div></div>
   </div>
-  <div class="appRow"><button id="bInstall" class="big b2" hidden>📲 Installer l'appli</button><button id="bShare" class="big b4">🔗 Partager le jeu</button><button id="bFull" class="big b4">⛶ Plein écran</button></div>
+  <div class="appRow"><button id="bInstall" class="big b2" hidden>📲 Installer l'appli</button><button id="bShare" class="big b4">🔗 Partager le jeu</button><button id="bFull" class="big b4">⛶ Plein écran</button><button id="bLang" class="big b4">🌐</button></div>
   <div class="modeRow"><button id="bMode" class="big b4"></button></div>
   <div class="btns">
    <button class="big" id="bSplit">🎮 2 joueurs<br><small>même écran</small></button>
@@ -53377,6 +53377,196 @@ function fbm(x,z,o=5,s=0){let t=0,a=0.5,f=1,n=0;for(let k=0;k<o;k++){t+=a*vnoise
 function catmull(p0,p1,p2,p3,t){const t2=t*t,t3=t2*t;const f=(a,b,c,d)=>0.5*((2*b)+(-a+c)*t+(2*a-5*b+4*c-d)*t2+(-a+3*b-3*c+d)*t3);return [f(p0[0],p1[0],p2[0],p3[0]),f(p0[1],p1[1],p2[1],p3[1])];}
 function hexRGB(h){return [((h>>16)&255)/255,((h>>8)&255)/255,(h&255)/255];}
 const store={get(k,d){try{const v=localStorage.getItem('duopiste_'+k);return v===null?d:JSON.parse(v);}catch(e){return d;}},set(k,v){try{localStorage.setItem('duopiste_'+k,JSON.stringify(v));}catch(e){}}};
+/* =========================================================
+   Langue : français ou anglais (anglais par défaut hors navigateurs français).
+   La traduction s'applique à l'affichage : textes de la page, messages,
+   textes dessinés (HUD, panneaux) et voix.
+   ========================================================= */
+const LANG=(()=>{try{const v=JSON.parse(localStorage.getItem('duopiste_lang'));if(v==='fr'||v==='en')return v;}catch(e){}return /^fr/i.test(navigator.language||'')?'fr':'en';})();
+const EN_PAIRS=[
+// --- titres / menu ---
+['2X2 — balade 4x4 à deux','2X2 — 4x4 adventure for two'],['Balade en 4x4 à deux : boue, sauts, radio CB, treuil, missions et défis','Off-road 4x4 adventure for two: mud, jumps, CB radio, winch, missions and challenges'],
+['Balade en 4x4 à deux','4x4 adventure for two'],['2 joueurs','2 players'],['même écran','same screen'],['Balade solo','Solo ride'],['Créer une partie','Create a game'],['en ligne','online'],
+['Rejoindre','Join'],['Mon personnage','My character'],['Son personnage','Their character'],['Pilote 1','Driver 1'],['Pilote 2','Driver 2'],['Pilote','Driver'],
+['Niveau','Level'],['prochain :','next:'],['tout débloqué !','all unlocked!'],['Installer l’appli',"Install the app"],["Installer l'appli","Install the app"],['Partager le jeu','Share the game'],['Plein écran','Fullscreen'],
+['Mode <b>Aventure</b> : missions, camping la nuit, livraisons…','<b>Adventure</b> mode: missions, night camping, deliveries…'],['Mode','Mode'],['Aventure','Adventure'],['Balade libre','Free ride'],
+['missions, camping la nuit, livraisons…','missions, night camping, deliveries…'],['juste rouler tranquille','just drive around'],['clic = balade libre','click = free ride'],['clic = aventure','click = adventure'],
+['Ton pseudo','Your nickname'],['Pseudo du pilote 1','Driver 1 nickname'],['Pseudo du pilote 2','Driver 2 nickname'],["C'est parti !","Let's go!"],['Annuler','Cancel'],
+['Ton pseudo doit faire au moins 2 lettres','Your nickname needs at least 2 letters'],['Le pseudo du pilote 2 doit faire au moins 2 lettres',"Driver 2's nickname needs at least 2 letters"],['Choisissez deux pseudos différents','Pick two different nicknames'],
+['Entre le code à 4 caractères de ton pote',"Enter your buddy's 4-character code"],['Rejoindre la partie','Join the game'],['Deux joueurs','Two players'],
+// --- pause ---
+['PAUSE','PAUSE'],['Volume général','Master volume'],['Musique','Music'],['Avancer l\'heure','Skip time'],["Avancer l'heure",'Skip time'],['Qualité','Quality'],['Haute','High'],['Normale','Normal'],['Rapide','Fast'],
+['Reprendre','Resume'],['Menu principal','Main menu'],['Mes véhicules','My vehicles'],["achète-en d'autres au 🔧 garage près du départ",'buy more at the 🔧 garage near the start'],['Revoir le tuto','Replay tutorial'],
+['Photo (F2)','Photo (F2)'],['Partager','Share'],['Code de la partie','Game code'],['Copier le lien','Copy link'],['Radio coupée','Radio off'],
+// --- aide ---
+['⌨️ Clavier','⌨️ Keyboard'],['🎮 Manette','🎮 Gamepad'],['📱 Tactile','📱 Touch'],
+['conduire (W A S D en QWERTY)','drive (Z Q S D on AZERTY)'],['conduire','drive'],['gaz doux','gentle throttle'],['frein à main','handbrake'],['klaxon','horn'],['phares','headlights'],
+['(maintenir) roue d\'émotes','(hold) emote wheel'],["(maintenir) roue d'émotes",'(hold) emote wheel'],['changer de vue','change view'],['treuil','winch'],['repère','marker'],['rejoindre le pote','join your buddy'],['remettre d\'aplomb','flip upright'],["remettre d'aplomb",'flip upright'],
+['ou','or'],['ouvrir la portière et sortir / remonter','open the door and get out / back in'],['portière : sortir / remonter','door: get out / back in'],['sortir / remonter','get out / back in'],['blocage','diff lock'],['warnings','hazards'],['messages radio','radio messages'],
+['Shift droit','Right Shift'],['Entrée','Enter'],['vue','view'],['rejoindre','join'],['aplomb','upright'],['Retour arrière','Backspace'],['pavé num.','numpad'],['radio','radio'],
+['Pour les deux','For both'],['(maintenir) parler en ligne','(hold) talk online'],['micro ouvert','open mic'],['grande carte + GPS','big map + GPS'],['défi course','race challenge'],['musique','music'],
+['clic-glisser : caméra','drag: camera'],['molette : zoom','wheel: zoom'],["cacher l'interface",'hide HUD'],['photo','photo'],['pause','pause'],['Échap','Esc'],
+['À faire','Things to do'],['Balises, missions, drifts, sauts = XP + 💰 pièces.','Beacons, missions, drifts, jumps = XP + 💰 coins.'],['Balises, missions, drifts, sauts = XP + 💰.','Beacons, missions, drifts, jumps = XP + 💰.'],
+['Garage (près du départ) : acheter des véhicules, livraisons 📦.','Garage (near the start): buy vehicles, deliveries 📦.'],['Zone PRO (sud-est) : parcours chronométré','PRO zone (south-east): timed course'],['la nuit : camping','at night: camping'],
+['Garage près du départ','Garage near the start'],['camping la nuit','night camping'],['Conduite','Driving'],['accélérer (progressif)','accelerate (analog)'],['accélérer (progressif','accelerate (analog'],['freiner / reculer','brake / reverse'],['diriger','steer'],
+['Stick gauche','Left stick'],['Stick droit','Right stick'],['caméra','camera'],['Actions','Actions'],['(maintenir) roue d\'émotes','(hold) emote wheel'],['sortir / remonter','get out / back in'],['remettre d\'aplomb','flip upright'],
+['Radio CB (croix)','CB radio (d-pad)'],['« Suis-moi »','"Follow me"'],['« Attends-moi »','"Wait for me"'],['« Viens voir »','"Come see"'],['« Bien joué »','"Well done"'],
+['À pied : stick gauche pour marcher, A pour courir','On foot: left stick to walk, A to run'],['à gauche : tourner','on the left: steer'],['Pédale de droite','Right pedal'],['appuie bas = doux, haut = à fond','press low = gentle, high = full'],
+['Pédale rouge : frein / marche arrière','Red pedal: brake / reverse'],['Boutons','Buttons'],['ouvre toutes les actions','opens all actions'],
+['sortir, vue, phares, émote, treuil, repère, aplomb, warnings, 4L, blocage, radio','exit, view, lights, emote, winch, marker, upright, hazards, 4L, diff lock, radio'],
+['À pied : ◀ ▶ + GAZ pour marcher, 🔧 = cale / frein à main','On foot: ◀ ▶ + GAS to walk, 🔧 = wheel chock / handbrake'],['Caméra','Camera'],
+["Fais glisser ton doigt sur l'écran pour tourner la caméra",'Slide your finger on the screen to turn the camera'],['en haut : grande carte, touche-la pour placer un GPS','at the top: big map, tap it to place a GPS point'],
+['Radio CB & caméra','CB radio & camera'],['(maintenir) parler à ton pote en ligne','(hold) talk to your buddy online'],['tourner la caméra','turn the camera'],
+// --- HUD ---
+['Radio CB','CB Radio'],['canal 19','channel 19'],['messages rapides : touches 1 à 6','quick messages: keys 1 to 6'],['messages rapides : 1-6 / pavé num. 1-6','quick messages: 1-6 / numpad 1-6'],['en ligne : parle avec ton pote · 1-6 messages','online: talk to your buddy · 1-6 messages'],
+['clique 🎙️ pour allumer le micro','click 🎙️ to turn on the mic'],['tu parles…','you\'re talking…'],['parle…','is talking…'],['en ligne avec','online with'],['connexion de la voix…','connecting voice…'],['micro coupé · maintiens V pour parler','mic off · hold V to talk'],
+['maintiens V pour parler · 1-6 messages','hold V to talk · 1-6 messages'],['Allumer le micro','Turn on the mic'],['Couper le micro','Mute the mic'],['Rallumer le micro','Unmute the mic'],
+['NIV.','LVL'],['MISSION ✔','MISSION ✔'],['CONVOI','CONVOY'],['Phares','Lights'],['À pied','On foot'],['remonter','get back in'],['marche dans le 4x4 pour le pousser','walk into the 4x4 to push it'],
+['pousse le 4x4 en marchant dedans','push the 4x4 by walking into it'],['frein serré','brake on'],['frein desserré','brake off'],['calé','chocked'],['poser','place'],['retirer','remove'],['une cale','a wheel chock'],
+['serrer','apply'],['desserrer','release'],['le frein à main','the handbrake'],['tr/min','rpm'],['PATINE !','WHEELSPIN!'],['Glou glou…','Glug glug…'],['GO !','GO!'],['Défi','Race'],['porte','gate'],
+['Eau','Water'],['Herbe','Grass'],['Piste','Track'],['Sable','Sand'],['Boue','Mud'],['Roche','Rock'],['Neige','Snow'],['enlisé !','stuck!'],['relâche pour envoyer','release to send'],
+['Poursuite loin','Far chase'],['Poursuite','Chase'],['Vue intérieure','Cockpit view'],['Caméra libre','Free camera'],['DRIFT','DRIFT'],['SAUT','JUMP'],['MÉGA SAUT','MEGA JUMP'],['SAUT SYNCHRO !','SYNC JUMP!'],['SPLASH !','SPLASH!'],
+['BALISE','BEACON'],['VICTOIRE','VICTORY'],['BIEN TENTÉ','NICE TRY'],['DÉPANNAGE','RESCUE'],['REPÈRE ATTEINT','MARKER REACHED'],['FEU DE CAMP','CAMPFIRE'],['NUIT AU CAMP','NIGHT AT CAMP'],['BOIS','WOOD'],['LIVRAISON','DELIVERY'],
+['PARCOURS PRO','PRO COURSE'],['TUTO TERMINÉ','TUTORIAL DONE'],['SOMMET','SUMMIT'],['Camping : bois','Camping: wood'],['état','condition'],
+// --- tuto ---
+['Tuto','Tutorial'],['recommandé','recommended'],['Passer le tuto','Skip tutorial'],['Bien !','Nice!'],
+["Accélère avec","Accelerate with"],["jusqu'à 25 km/h",'up to 25 km/h'],['Appuie sur la pédale verte','Press the green pedal'],['Tourne avec les boutons ◀ ▶','Steer with the ◀ ▶ buttons'],['Tourne avec le','Steer with the'],['Tourne avec','Steer with'],
+['fais un grand virage','make a big turn'],['stick gauche','left stick'],['Drift ! Tourne +','Drift! Turn +'],['en roulant','while driving'],['Change de vue avec','Change view with'],['essaie la vue intérieure','try the cockpit view'],
+['Q en QWERTY','A on AZERTY'],['Tourne la caméra : clic-glisser avec la souris','Turn the camera: drag with the mouse'],['Tourne la caméra avec le','Turn the camera with the'],['stick droit','right stick'],
+["Glisse ton doigt sur l'écran pour tourner la caméra",'Slide your finger on the screen to turn the camera'],['Envoie un message radio à ton pote : touche','Send a radio message to your buddy: key'],['Message radio :','Radio message:'],['croix ↑','d-pad ↑'],['bouton','button'],
+['Maintiens','Hold'],["roue d'émotes, choisis et relâche",'emote wheel, pick and release'],["roue d'émotes",'emote wheel'],['Ouvre la grande carte avec','Open the big map with'],['Ouvre la carte avec le bouton 🗺️','Open the map with the 🗺️ button'],['Ouvre la carte avec 🗺️ en haut','Open the map with 🗺️ at the top'],
+['Arrête-toi et sors du 4x4 avec','Stop and get out of the 4x4 with'],['Arrête-toi et sors avec','Stop and get out with'],['Pousse ton 4x4 en marchant dedans, puis remonte','Push your 4x4 by walking into it, then get back in'],['Pousse ton 4x4 puis remonte','Push your 4x4 then get back in'],
+['près de la portière gauche','near the left door'],['Suis le point GPS 🧭 jusqu\'au','Follow the GPS point 🧭 to the'],["Suis le point GPS 🧭 jusqu'au",'Follow the GPS point 🧭 to the'],['et arrête-toi sur le cercle jaune','and stop on the yellow circle'],['garage','garage'],
+['Tuto terminé ! +500 💰 pour bien démarrer','Tutorial done! +500 💰 to get started'],['Tuto passé · tu peux le relancer depuis la pause','Tutorial skipped · you can replay it from the pause menu'],
+['Bienvenue dans 2X2 ! Je vais te montrer comment tout marche.',"Welcome to 2X2! I'll show you how everything works."],['Bravo, tu sais tout ! Amuse-toi bien.','Well done, you know it all! Have fun.'],
+// --- chargement ---
+['Chauffage du moteur…','Warming up the engine…'],['Tracé des pistes…','Drawing the tracks…'],['Tracé du Chemin des Pros…',"Building the Pros' Trail…"],['Modelage des collines…','Shaping the hills…'],['Pose des rochers…','Placing rocks…'],
+['On cache les balises…','Hiding the beacons…'],['Construction du garage…','Building the garage…'],['Repérage des coins de camping…','Scouting camp spots…'],['Plantage des sapins…','Planting pine trees…'],['Gonflage des pneus…','Inflating the tyres…'],
+['Réglage des amortisseurs…','Tuning the shocks…'],['On ramasse du bois…','Gathering firewood…'],['Plantage des arbres du chemin…','Planting the trail trees…'],['Dessin de la carte…','Drawing the map…'],["C'est parti !","Let's go!"],
+['On creuse la boue…','Digging the mud…'],['Remplissage du lac…','Filling the lake…'],["On lave pas le 4x4, c'est fait exprès…","We don't wash the 4x4, it's on purpose…"],['Réveil des marmottes…','Waking up the marmots…'],['Accordage de la radio CB…','Tuning the CB radio…'],
+['En route pour les pistes…','Heading to the trails…'],['Connexion à ton pote…','Connecting to your buddy…'],['Ouverture de la partie…','Opening the game…'],
+// --- toasts courants ---
+['Bonne balade !','Have a nice ride!'],['Écran partagé : à gauche Pilote 1, à droite Pilote 2','Split screen: Driver 1 on the left, Driver 2 on the right'],['Trouvez les balises jaunes cachées sur la carte !','Find the yellow beacons hidden on the map!'],
+['Le garage est juste à côté : entre dedans et arrête-toi sur le cercle jaune','The garage is right next to you: drive in and stop on the yellow circle'],
+['Codes allumés','Low beams on'],['Pleins phares !','High beams!'],['Phares éteints','Lights off'],['Il fait nuit : phares allumés automatiquement (F = pleins phares)','Night time: lights switched on automatically (F = high beams)'],
+['Vitesses courtes (4L) : plus de couple, moins de vitesse','Low range (4L): more torque, less speed'],['Vitesses normales (4H)','High range (4H)'],['Blocage de différentiel : accroche dans la boue, le sable et la neige','Diff lock: grips in mud, sand and snow'],['Différentiel débloqué','Diff unlocked'],
+['remet son 4x4 d\'aplomb','flips their 4x4 upright'],["remet son 4x4 d'aplomb",'flips their 4x4 upright'],['rejoint','joins'],["Pas de pote à rejoindre… pour l'instant !",'No buddy to join… yet!'],['Attends','Wait'],
+['enlève son repère','removes their marker'],['Vise le sol pour placer un repère','Aim at the ground to place a marker'],["a placé un repère (rappuie pour l'enlever)",'placed a marker (press again to remove it)'],['a placé un repère','placed a marker'],['a atteint le repère !','reached the marker!'],
+['Treuil détaché','Winch detached'],['Treuil accroché au pote ! Il s’enroule tout seul','Winch hooked to your buddy! It reels in by itself'],['Treuil accroché à l’arbre ! Il s’enroule : accélère doucement','Winch hooked to the tree! It reels in: accelerate gently'],['Treuil accroché !','Winch hooked!'],
+['Le câble du treuil a lâché !','The winch cable snapped!'],['Trop loin','Too far'],["ou approche-toi d'un arbre à sangle jaune",'or get close to a tree with a yellow strap'],['Approche-toi de ton pote ou d’un arbre à sangle jaune','Get close to your buddy or a tree with a yellow strap'],
+['Il faut un pote pour le treuil !','You need a buddy for the winch!'],['Trop haut pour passer seul : fais-toi pousser ou treuiller !','Too high to pass alone: get pushed or winched!'],
+['est à pied','is on foot'],['pousse ton 4x4 en marchant dedans','push your 4x4 by walking into it'],['pour remonter','to get back in'],['Arrête-toi d\'abord pour sortir','Stop first to get out'],["Arrête-toi d'abord pour sortir",'Stop first to get out'],
+['Approche-toi de la portière de ton','Get close to the door of your'],['(côté gauche)','(left side)'],['remonte dans son 4x4','gets back in their 4x4'],['Ton 4x4 est loin… G pour le rejoindre (à pied, tu te téléportes au volant)','Your 4x4 is far away… G to go back (on foot, you teleport to the wheel)'],
+['Frein à main serré','Handbrake on'],['Frein à main desserré : le 4x4 peut rouler (ou être poussé)','Handbrake off: the 4x4 can roll (or be pushed)'],['Frein à main desserré','Handbrake off'],['les cales sont encore en place !','the wheel chocks are still in place!'],
+['Le frein à main est serré : E près de la portière pour le desserrer','The handbrake is on: E near the door to release it'],['Le 4x4 est calé : E près d’une roue pour retirer la cale','The 4x4 is chocked: E near a wheel to remove the chock'],
+['Cale posée : le 4x4 ne peut plus rouler de ce côté','Chock placed: the 4x4 can no longer roll this way'],['Cale retirée','Chock removed'],["Approche-toi d'une roue (cale) ou de la portière gauche (frein à main)",'Get close to a wheel (chock) or the left door (handbrake)'],
+['Tu as roulé sur tes cales ! (pense à les retirer avec E à pied)','You drove over your chocks! (remove them with E on foot)'],
+['a trouvé une balise !','found a beacon!'],['Toutes les balises trouvées ! Bravo l\'équipe !','All beacons found! Great teamwork!'],["Toutes les balises trouvées ! Bravo l'équipe !",'All beacons found! Great teamwork!'],
+['DÉFI ! Premier au drapeau à damier !','RACE! First to the checkered flag!'],['gagne le défi !','wins the race!'],['Un défi est déjà en cours !','A race is already on!'],['Pas de défi possible ici, bouge un peu !','No race possible here, move a bit!'],['Aucun défi en cours','No race in progress'],
+['passe NIVEAU','reaches LEVEL'],['Débloqué :','Unlocked:'],['Nouveau record de saut :','New jump record:'],['Nouveau record de drift :','New drift record:'],
+['a noyé son 4x4… retour sur la terre ferme','drowned their 4x4… back to dry land'],['On avance le temps…','Skipping time…'],['Manette détectée !','Gamepad detected!'],
+['Lien copié !','Link copied!'],['Lien du jeu copié !','Game link copied!'],['Photo enregistrée !','Photo saved!'],['Photo impossible ici','Photo not available here'],['Plein écran indisponible ici','Fullscreen not available here'],
+['2X2 est installé ! Lance-le depuis son icône','2X2 is installed! Launch it from its icon'],['Installation…','Installing…'],['Sur iPhone : touche « Partager » ⬆️ en bas de Safari, puis « Sur l’écran d’accueil »','On iPhone: tap "Share" ⬆️ at the bottom of Safari, then "Add to Home Screen"'],
+['Ouvre le menu ⋮ du navigateur puis « Installer l’application »','Open the browser ⋮ menu then "Install app"'],
+['Téléchargement de la voix humaine (une seule fois)…','Downloading the human voice (only once)…'],['Voix humaine prête !','Human voice ready!'],
+// --- réseau / radio ---
+['Code à donner à ton pote :','Code to give your buddy:'],['en attente du pote…','waiting for your buddy…'],['Partie','Game'],['connecté ✅','connected ✅'],['radio CB allumée','CB radio on'],['Allumer la radio CB (micro)','Turn on the CB radio (mic)'],
+['Connexion à la partie','Connecting to game'],['Partie introuvable, vérifie le code','Game not found, check the code'],['Le mode en ligne est indisponible ici 😕','Online mode is unavailable here 😕'],['Réseau :','Network:'],['Code :','Code:'],
+['a rejoint la balade !','joined the ride!'],["Ton pote s'est déconnecté",'Your buddy disconnected'],['Ton pote','Your buddy'],['ton pote','your buddy'],['change de station','changes station'],
+['Radio CB allumée ! Maintiens V (ou 🎙️) pour parler','CB radio on! Hold V (or 🎙️) to talk'],["Radio CB allumée : ton pote t'entend ! (🎙️ pour couper)",'CB radio on: your buddy can hear you! (🎙️ to mute)'],['Radio CB allumée : maintiens V pour parler','CB radio on: hold V to talk'],
+["Micro refusé : autorise le micro (icône 🔒 dans la barre d'adresse) puis clique sur 🎙️",'Mic blocked: allow the microphone (🔒 icon in the address bar) then click 🎙️'],
+["Micro ouvert : ton pote t'entend",'Mic open: your buddy can hear you'],['Micro coupé (maintiens V pour parler)','Mic muted (hold V to talk)'],
+['À deux sur le même écran : utilise les messages rapides 1-6 (pavé num. pour le pilote 2)','Two on one screen: use quick messages 1-6 (numpad for driver 2)'],['La radio CB marche en ligne : crée une partie et invite ton pote !','The CB radio works online: create a game and invite your buddy!'],
+['Clique n\'importe où pour entendre ton pote',"Click anywhere to hear your buddy"],["Clique n'importe où pour entendre ton pote",'Click anywhere to hear your buddy'],['Ton pote a placé un point GPS','Your buddy placed a GPS point'],
+['Suis-moi ! 🚙','Follow me! 🚙'],['Attends-moi ! ✋','Wait for me! ✋'],['Viens voir ça ! 👀','Come see this! 👀'],['Je suis coincé, treuil ! 🪝',"I'm stuck, winch me! 🪝"],['Une course ? 🏁','A race? 🏁'],['Bien joué ! 🎉','Well done! 🎉'],
+['Suis-moi','Follow me'],['Attends','Wait'],
+// --- garage / boutique / véhicules ---
+['GARAGE 2X2','GARAGE 2X2'],['Garage 2X2','Garage 2X2'],['Au volant','Driving it'],['Prendre','Use'],['Acheter','Buy'],['Gratuit (admin)','Free (admin)'],['gratuit (admin)','free (admin)'],['Peinture (gratuite)','Paint (free)'],
+['Prendre une livraison','Take a delivery'],['Sortir du garage','Leave the garage'],['Vitesse','Speed'],['Accélération','Acceleration'],['Adhérence','Grip'],['Suspension','Suspension'],['Pas assez de pièces !','Not enough coins!'],
+['achète le','buys the'],['prend le','takes the'],['à acheter au garage 🔧','to buy at the garage 🔧'],['peut s\'acheter le',"can buy the"],["peut s'acheter le",'can buy the'],['au garage 🔧 !','at the garage 🔧!'],['Tu as déjà une livraison en cours !','You already have a delivery!'],
+['Le 4x4 de base, solide partout','The basic 4x4, tough everywhere'],['Plus rapide, avec une benne','Faster, with a truck bed'],['Léger et nerveux, il vole loin','Light and punchy, it flies far'],['Roues géantes, suspension énorme','Giant wheels, huge suspension'],
+['Lent mais tellement stylé ✌️','Slow but so stylish ✌️'],['Lent, mais il passe partout','Slow, but goes everywhere'],['Baroudeur','Explorer'],['Pick-up','Pickup'],['Buggy des dunes','Dune buggy'],['Monster truck','Monster truck'],['Van hippie','Hippie van'],['Tracteur','Tractor'],
+['Gyrophare orange','Orange beacon light'],['Pneus monstres','Monster tyres'],['Fanions sur le toit','Roof flags'],['Kayak sur la galerie','Kayak on the roof rack'],['Klaxon musical','Musical horn'],["Flammes d'échappement",'Exhaust flames'],['Néons sous la caisse','Underglow neons'],['Jantes en or','Gold rims'],['Traînée arc-en-ciel','Rainbow trail'],
+['Livraison :','Delivery:'],["Attention, c'est fragile !","Careful, it's fragile!"],['colis de pièces','parts package'],["caisse d'œufs",'crate of eggs'],['pizzas brûlantes','hot pizzas'],['guitare du rockeur',"rocker's guitar"],['fioles du labo','lab vials'],
+['Livré !','Delivered!'],['bonus rapidité','speed bonus'],['est détruit… livraison ratée !','is destroyed… delivery failed!'],['Aïe !','Ouch!'],
+// --- personnage ---
+['Personnage du pilote','Character of driver'],['Personnage','Character'],['Enregistrer','Save'],['Au hasard','Random'],['Personnage enregistré !','Character saved!'],['Peau','Skin'],['Coiffure','Hair'],['Couleur cheveux','Hair colour'],['Haut','Top'],['Pantalon','Trousers'],['Chapeau','Hat'],['Lunettes','Glasses'],
+['court','short'],['long','long'],['crête','mohawk'],['afro','afro'],['chauve','bald'],['couettes','pigtails'],['casquette','cap'],['aucun','none'],['cowboy','cowboy'],['bonnet','beanie'],['casque','helmet'],['couronne','crown'],['aucune','none'],['soleil','sunglasses'],['ski','ski goggles'],['rondes','round'],
+// --- missions ---
+['Faire 4 sauts','Do 4 jumps'],['Un saut de plus de 1,4 s','A jump over 1.4 s'],['Drifter 8 s au total','Drift 8 s in total'],["Faire 2 splashs dans l'eau",'Make 2 splashes in water'],['Trouver une balise ⭐','Find a beacon ⭐'],['Rouler 45 s en convoi','Drive 45 s in convoy'],
+['Parcourir 2 km','Drive 2 km'],['Rouler 15 s dans la boue','Drive 15 s in mud'],['Gagner un défi course 🏁','Win a race 🏁'],['Rouler 400 m de nuit, phares allumés','Drive 400 m at night with lights on'],["Grimper jusqu'à la neige ❄️",'Climb up to the snow ❄️'],
+['Envoyer 3 messages radio','Send 3 radio messages'],['Sauter en même temps que ton pote','Jump at the same time as your buddy'],['Atteindre 95 km/h','Reach 95 km/h'],['Envoyer 3 émotes','Send 3 emotes'],['Allumer un feu de camp 🔥','Light a campfire 🔥'],['Réussir une livraison 📦','Complete a delivery 📦'],
+// --- camping ---
+['Au coin du feu','By the fire'],['Raconte une histoire','Tell a story'],["Dormir jusqu'au matin",'Sleep until morning'],['ramasse du bois','picks up wood'],['dans la galerie','on the roof rack'],['dépose','drops'],['bûche','log'],['au camp','at the camp'],['a déposé du bois au camp','dropped wood at the camp'],
+['allume le feu de camp ! Installez-vous…','lights the campfire! Make yourselves comfortable…'],['Bien dormi ! Le soleil se lève sur le camp.','Slept well! The sun rises over the camp.'],
+["Belle soirée au coin du feu. Quand vous voulez, vous pouvez dormir jusqu'au matin.",'A nice evening by the fire. Whenever you like, you can sleep until morning.'],['Un feu en plein jour… pourquoi pas !','A fire in broad daylight… why not!'],
+// --- PRO / GPS / carte ---
+['lance le parcours PRO ! Passe les','starts the PRO course! Go through the'],['portes','gates'],['termine le parcours PRO en','finishes the PRO course in'],['RECORD !','RECORD!'],['record','record'],['Parcours PRO abandonné','PRO course abandoned'],['a fini le parcours PRO en','finished the PRO course in'],
+['DÉPART PRO','PRO START'],['ARRIVÉE','FINISH'],['PORTE','GATE'],['ZONE PRO','PRO ZONE'],['Rochers, marches, ravins…','Rocks, ledges, ravines…'],["dose bien l'accélérateur !",'go easy on the throttle!'],
+['Point GPS placé à','GPS point placed at'],['est arrivé au point GPS !','reached the GPS point!'],['Carte','Map'],['Clique pour placer un point GPS 🧭','Click to place a GPS point 🧭'],['Effacer le GPS','Clear GPS'],['Fermer','Close'],
+['Désert','Desert'],['Montagnes','Mountains'],['Grande forêt','Big forest'],['Garage','Garage'],
+// --- chemin des pros ---
+['Chemin des Pros',"Pros' Trail"],['CHEMIN DES PROS',"PROS' TRAIL"],['5 km · le but : le sommet','5 km · goal: the summit'],['bravo l’équipe !','great teamwork!'],
+['Le Chemin des Pros : 5 km de forêts, collines et pièges… le but : arriver au sommet, à deux 🤝',"The Pros' Trail: 5 km of forests, hills and traps… the goal: reach the summit, together 🤝"],
+['Sous-bois et bosses : faufile-toi entre les arbres','Undergrowth and bumps: weave between the trees'],['Grandes montées : 4L (touche 7) et gaz doux (Shift)','Big climbs: 4L (key 7) and gentle throttle (Shift)'],
+['BOURBIERS sur toute la largeur : treuille-toi aux arbres en face (T) ou fais-toi tirer par ton pote','MUD BOGS across the whole width: winch to the trees ahead (T) or get pulled by your buddy'],
+['MARCHES trop hautes pour passer seul : pousse (Tab) ou treuille ton pote, ou les arbres en face','LEDGES too high to pass alone: push (Tab) or winch your buddy, or the trees ahead'],
+['Forêt profonde et ravins : restez groupés !','Deep forest and ravines: stay together!'],['Dernière grande montée boueuse : poussez et treuillez ensemble !','Last big muddy climb: push and winch together!'],['Le sommet est tout proche !','The summit is very close!'],
+['Forêt d’entrée','Entrance forest'],['Bosses & sous-bois','Bumps & undergrowth'],['Grandes montées','Big climbs'],['Bourbiers','Mud bogs'],['Marches rocheuses','Rock ledges'],['Forêt profonde','Deep forest'],['Montée de boue','Mud climb'],['Sommet','Summit'],
+['section du Chemin des Pros',"section of the Pros' Trail"],['atteint le SOMMET du Chemin des Pros en',"reaches the SUMMIT of the Pros' Trail in"],['Incroyable, vous êtes au sommet ! Quelle équipe !',"Incredible, you're at the summit! What a team!"],
+// --- admin ---
+['Accès restreint','Restricted access'],['Entrer','Enter'],['Contrôle admin','Admin panel'],['Tout remettre normal','Reset everything'],['Tout est redevenu normal','Everything is back to normal'],
+['pièces','coins'],['niveau','level'],['Tous les véhicules','All vehicles'],['Tous les véhicules disponibles','All vehicles available'],['Ouvrir le garage ici','Open the garage here'],['TP au garage','TP to garage'],['TP au départ','TP to start'],['TP sur le pote','TP to buddy'],
+['TP balise la plus proche','TP to nearest beacon'],['TP au drapeau du défi','TP to race flag'],['Matin','Morning'],['Midi','Noon'],['Soir','Evening'],['Nuit','Night'],['Vitesse ×2','Speed ×2'],['Anti-noyade','No drowning'],['Remettre tout le monde sur ses roues','Put everyone back on their wheels'],
+['Prendre toutes les balises','Collect all beacons'],['Remettre les balises','Reset beacons'],['Afficher FPS & infos','Show FPS & info'],['Remettre ma progression à zéro','Reset my progress'],['Reclique dans les 4 s pour confirmer la remise à zéro','Click again within 4 s to confirm the reset'],
+['Progression remise à zéro','Progress reset'],['Téléportation :','Teleport:'],['Téléporté derrière le pote','Teleported behind your buddy'],['Pas de pote connecté','No buddy connected'],['Toutes les balises sont prises','All beacons already collected'],['Balises remises en place','Beacons reset'],
+['départ','start'],['balise','beacon'],['drapeau','flag'],['roues au sol','wheels on ground'],['réseau','network'],['connecté','connected'],['voix','voice'],
+// --- PNJ / DJ / histoires ---
+['Salut les jeunes !','Hi kids!'],['Belle bête, ton 4x4 !','Nice beast, your 4x4!'],['Attention, ça glisse plus loin !','Careful, it gets slippery up ahead!'],['On se fait une course ?','Fancy a race?'],['Pas mal ce drift !','Nice drift!'],
+['Salut les baroudeurs ! Ici','Hello adventurers! This is'],['on garde les mains sur le volant.','keep your hands on the wheel.'],['Petite dédicace aux deux pilotes qui mettent de la boue partout !','A shout-out to the two drivers splashing mud everywhere!'],
+['Météo des pistes : poussière en vue, ouvrez les fenêtres… ou pas.','Trail weather: dust ahead, open your windows… or not.'],["N'oubliez pas : un bon pote, ça se treuille.",'Remember: a good buddy is one you can winch.'],['Si vous voyez un arbre, contournez-le. Conseil de pro.','If you see a tree, go around it. Pro tip.'],
+['On continue la balade, restez avec nous !','The ride goes on, stay with us!'],['Vous écoutez','You are listening to'],['Bienvenue à','Welcome to'],['qui rejoint la balade !','who joins the ride!'],
+['On raconte qu\'un vieux 4x4 rouge roule encore la nuit dans la zone pro, sans personne au volant. Si vous entendez un klaxon au loin… ne répondez pas.',"They say an old red 4x4 still drives at night in the pro zone, with nobody at the wheel. If you hear a horn in the distance… don't answer."],
+["On raconte qu'un vieux 4x4 rouge roule encore la nuit dans la zone pro, sans personne au volant. Si vous entendez un klaxon au loin… ne répondez pas.","They say an old red 4x4 still drives at night in the pro zone, with nobody at the wheel. If you hear a horn in the distance… don't answer."],
+["Il paraît qu'une balise dorée est cachée quelque part dans le désert. Ceux qui l'ont cherchée sont revenus… couverts de sable.",'Rumour has it a golden beacon is hidden somewhere in the desert. Those who looked for it came back… covered in sand.'],
+["Un jour, deux pilotes ont voulu traverser le grand lac à la nage avec leur 4x4. Le lac s'en souvient encore.",'One day, two drivers tried to swim across the big lake in their 4x4. The lake still remembers.'],
+["Écoutez bien… ce bruit dans la forêt, c'est sûrement une marmotte. Probablement. Peut-être.",'Listen… that noise in the forest is surely a marmot. Probably. Maybe.'],
+['country des pistes','trail country'],['néons & couchers de soleil','neon & sunsets'],['chill pour rouler cool','chill for cruising'],['ça tape dans les bosses','banging over bumps'],['house qui éclabousse','splashy house'],
+['Radio Poussière','Dust Radio'],['Lo-Fi Sentier','Lo-Fi Trail'],['Électro Boue','Mud Electro'],['silence…','silence…'],
+// --- divers ---
+['à','at'],['🎙️ Tu parles…',"🎙️ You're talking…"],['Tu parles…',"You're talking…"],['🎮 Manette détectée !','🎮 Gamepad detected!'],['poser / enlever un repère','place / remove a marker'],['Téléportation au sommet !','Teleported to the summit!'],['émotes','emotes'],['Émote','Emote'],['Sortir','Exit'],['Treuil','Winch'],['Repère','Marker'],['Aplomb','Upright'],['Warnings','Hazards'],['Blocage','Diff lock'],['Remonter','Get back in'],['frein à main','handbrake'],
+['Ce véhicule n’a pas de portière',"This vehicle has no door"],['Il pleut des vaches !','It\'s raining cows!'],['Mon perso','My character'],['km/h','km/h'],
+];
+// une seule passe : la plus longue expression d'abord, et uniquement des mots entiers
+const EN_MAP=new Map();for(const [a,b] of EN_PAIRS)if(a!==b&&!EN_MAP.has(a))EN_MAP.set(a,b);
+const _keys=[...EN_MAP.keys()].sort((a,b)=>b.length-a.length);
+const _esc=s=>s.replace(/[.*+?^${}()|[\]\\]/g,'\\$&');
+const EN_RE=new RegExp(_keys.map(k=>(/^\p{L}/u.test(k)?'(?<!\\p{L})':'')+_esc(k)+(/\p{L}$/u.test(k)?'(?!\\p{L})':'')).join('|'),'gu');
+const _trCache=new Map();
+function tr(t){
+  if(LANG==='fr'||typeof t!=='string'||t.length<2)return t;
+  let r=_trCache.get(t);if(r!==undefined)return r;
+  r=/\p{L}{2}/u.test(t)?t.replace(EN_RE,m=>EN_MAP.get(m)??m):t;
+  if(_trCache.size>6000)_trCache.clear();_trCache.set(t,r);return r;
+}
+if(LANG==='en'){
+  // textes dessinés sur les canvas (HUD, panneaux du décor)
+  const P=CanvasRenderingContext2D.prototype;
+  for(const fn of ['fillText','strokeText','measureText']){const o=P[fn];P[fn]=function(t,...a){return o.call(this,tr(t),...a);};}
+  // textes de la page (y compris ceux ajoutés plus tard)
+  const trNode=n=>{
+    if(n.nodeType===3){const v=n.nodeValue;if(v&&v.trim()){const w=tr(v);if(w!==v)n.nodeValue=w;}return;}
+    if(n.nodeType!==1||n.tagName==='SCRIPT'||n.tagName==='STYLE')return;
+    for(const at of ['title','placeholder']){const v=n.getAttribute&&n.getAttribute(at);if(v){const w=tr(v);if(w!==v)n.setAttribute(at,w);}}
+    for(const c of n.childNodes)trNode(c);
+  };
+  document.title=tr(document.title);document.documentElement.lang='en';
+  trNode(document.body);
+  new MutationObserver(ms=>{for(const m of ms){if(m.type==='characterData')trNode(m.target);else m.addedNodes.forEach(trNode);}}).observe(document.body,{childList:true,subtree:true,characterData:true});
+}
+window.__tr=tr;
+function setLang(l){try{localStorage.setItem('duopiste_lang',JSON.stringify(l));}catch(e){}location.reload();}
+
 
 /* =========================================================
    Génération du monde (déterministe : identique pour les 2 joueurs)
@@ -54106,9 +54296,9 @@ const DJ_LINES=[
   ()=>`On continue la balade, restez avec nous !`,
 ];
 /* ---------- Voix humaine (Piper, open source, calculée dans le navigateur) ---------- */
-const HV={mod:null,state:'idle',voice:'fr_FR-siwis-medium',queue:Promise.resolve()};
+const HV={mod:null,state:'idle',voice:LANG==='en'?'en_US-amy-medium':'fr_FR-siwis-medium',queue:Promise.resolve()};
 function bestSystemVoice(){
-  const vs=(window.speechSynthesis&&speechSynthesis.getVoices()||[]).filter(v=>/^fr/i.test(v.lang));
+  const vs=(window.speechSynthesis&&speechSynthesis.getVoices()||[]).filter(v=>(LANG==='en'?/^en/i:/^fr/i).test(v.lang));
   const score=v=>(/natural|neural|online/i.test(v.name)?100:0)+(/google/i.test(v.name)?50:0)+(/denise|vivienne|eloise|henri|remy/i.test(v.name)?20:0)-(/hortense|julie|paul/i.test(v.name)?10:0);
   return vs.sort((a,b)=>score(b)-score(a))[0]||null;
 }
@@ -54123,6 +54313,7 @@ async function loadHumanVoice(){
 }
 // parle avec une vraie voix ; radio=true ajoute l'effet talkie ; pitch change un peu le timbre
 function sayHuman(text,{radio=false,rate=1,duck=true}={}){
+  text=tr(String(text));
   text=String(text).replace(/[^\p{L}\p{N}\s'’!?,.:;-]/gu,'').trim();if(!text)return;
   if(HV.state==='idle')loadHumanVoice();
   if(HV.state==='ready'&&AC){
@@ -54142,7 +54333,7 @@ function sayHuman(text,{radio=false,rate=1,duck=true}={}){
   systemSay(text,rate);
 }
 function systemSay(text,rate=1){
-  try{const ss=window.speechSynthesis;if(!ss)return;const u=new SpeechSynthesisUtterance(text);u.lang='fr-FR';u.rate=1.0*rate;u.pitch=1.0;const v=bestSystemVoice();if(v)u.voice=v;ss.speak(u);}catch(e){}
+  try{const ss=window.speechSynthesis;if(!ss)return;const u=new SpeechSynthesisUtterance(text);u.lang=LANG==='en'?'en-US':'fr-FR';u.rate=1.0*rate;u.pitch=1.0;const v=bestSystemVoice();if(v)u.voice=v;ss.speak(u);}catch(e){}
 }
 
 let djVoice=null;
@@ -54495,10 +54686,12 @@ class Car{
       if(thr>0)acc=vf<-0.5?20*thr:13.5*MD.acc*(this.low?1.55:1)*Math.sqrt(ADMIN.turbo)*thr*Math.max(0,1-vf/maxS);
       else if(thr<0)acc=vf>0.5?22*thr:7*thr*Math.max(0,1+vf/11);
       // adhérence limitée : trop de gaz = les roues patinent (il faut doser)
-      {const maxA=(1-bog*0.5)*16*Math.min(1.25,S.grip/6)*(water?0.75:1)*(this.low?1.6:1)*(this.lock&&(this.surf===2||this.surf===3||this.surf===5)?1.45:1);
+      // 4L : énorme couple à bas régime, bien plus efficace dans la boue et les bourbiers
+      const muddy=this.surf===3||bog>0.1;
+      {const maxA=(1-bog*0.5*(this.low?0.35:1))*16*Math.min(1.25,S.grip/6)*(water?0.75:1)*(this.low?(muddy?3.2:1.6):1)*(this.lock&&(this.surf===2||this.surf===3||this.surf===5)?1.45:1);
         if(Math.abs(acc)>maxA&&Math.abs(vf)<14){this.spinSlip=Math.max(this.spinSlip,Math.min(1,(Math.abs(acc)-maxA)/6+0.4));acc=Math.sign(acc)*maxA*0.55;}}
       acc*=Math.max(0.35,tf);vf+=acc*dt;
-      const drag=S.drag*(water?3.2:1)*(1+bog*1.5)+(thr===0?0.3:0);
+      const drag=S.drag*(water?3.2:1)*(1+bog*1.5*(this.low?0.3:1))*(this.low&&this.surf===3?0.6:1)+(thr===0?0.3:0);
       vf-=vf*drag*dt*tf+vf*Math.abs(vf)*0.0015*dt;
       // frein à main : bloque les roues (freinage net, glisse en virage)
       if(inp.hand){const dec=Math.min(Math.abs(vf),8.5*dt*Math.max(0.4,tf)*Math.min(1.2,S.grip/6+0.3));vf-=Math.sign(vf)*dec;}
@@ -56385,6 +56578,7 @@ document.getElementById('bSolo').onclick=()=>askNick('solo');
 document.getElementById('bHost').onclick=()=>askNick('host');
 document.getElementById('bJoin').onclick=()=>{const v=document.getElementById('jCode').value.trim();if(v.length!==4){toast('Entre le code à 4 caractères de ton pote');return;}askNick('join');};
 document.getElementById('bResume').onclick=()=>togglePause();
+document.getElementById('bLang').textContent=LANG==='fr'?'🇬🇧 English':'🇫🇷 Français';document.getElementById('bLang').onclick=()=>setLang(LANG==='fr'?'en':'fr');
 document.getElementById('bInstall').onclick=doInstall;document.getElementById('bShare').onclick=shareGame;document.getElementById('bFull').onclick=toggleFullscreen;
 document.getElementById('bPhoto').onclick=()=>{togglePause();setTimeout(takePhoto,150);};document.getElementById('bFull2').onclick=toggleFullscreen;document.getElementById('bShare2').onclick=shareGame;
 document.addEventListener('click',e=>{const b=e.target.closest&&e.target.closest('button');if(b)setTimeout(()=>b.blur(),0);},true);
