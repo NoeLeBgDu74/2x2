@@ -53371,6 +53371,13 @@ function cgGameplay(on){
   cgCall(s=> on ? s.game.gameplayStart() : s.game.gameplayStop());
 }
 function cgHappy(){ cgCall(s=>s.game.happytime()); }
+// salle multijoueur CrazyGames (updateRoom / leftRoom) : permet aux amis de rejoindre depuis la plateforme
+let cgInRoom=false;
+function cgRoom(on){
+  if(on){if(!Net.code)return;const full=Net.remotes&&Net.remotes.size>=7;
+    cgCall(s=>{if(s.game.updateRoom)s.game.updateRoom({roomId:Net.code,isJoinable:!full,inviteParams:{room:Net.code}});});cgInRoom=true;}
+  else if(cgInRoom){cgCall(s=>{if(s.game.leftRoom)s.game.leftRoom();});cgInRoom=false;}
+}
 function cgInviteParam(name){
   let v=null;
   cgCall(s=>{ v = s.game.getInviteParam(name); });
@@ -55283,7 +55290,7 @@ function netHost(){
   Net.host=true;Net.code=genCode();Net.myId=ID_PREFIX+Net.code;Net.group=1;
   Net.peer=new Peer(Net.myId,{debug:0,config:ICE});
   Net.peer.on('open',()=>{
-    cgCall(s=>{Net.inviteUrl=s.game.inviteLink({room:Net.code});});cgCall(s=>s.game.showInviteButton({room:Net.code}));
+    cgCall(s=>{Net.inviteUrl=s.game.inviteLink({room:Net.code});});cgCall(s=>s.game.showInviteButton({room:Net.code}));cgRoom(true);
     lobbyStatus();
   });
   Net.peer.on('connection',c=>{
@@ -55308,7 +55315,7 @@ function netJoin(code){
   lobby(`🔗 Connexion à la partie <b>${Net.code}</b>…`);
   Net.peer=new Peer({debug:0,config:ICE});
   Net.peer.on('open',id=>{Net.myId=id;const c=Net.peer.connect(ID_PREFIX+Net.code,{reliable:true});Net.conn=c;
-    c.on('open',()=>{Net.connected=true;c.send(myHello());lobbyStatus();if(Net.open)enableTalkie();cgCall(s=>s.game.hideInviteButton());});
+    c.on('open',()=>{Net.connected=true;c.send(myHello());lobbyStatus();if(Net.open)enableTalkie();cgCall(s=>s.game.hideInviteButton());cgRoom(true);});
     c.on('data',m=>{if(m&&m.t)onNet(m);});
     c.on('close',()=>{toast('📴 La partie est terminée (le créateur est parti)');for(const id of [...Net.remotes.keys()])dropPlayer(id,false);Net.connected=false;Net.conn=null;lobby(null);cbStatus();});
   });
@@ -55319,7 +55326,7 @@ function addPlayer(h){
   if(!h||!h.id||h.id===Net.myId)return null;
   let R=Net.remotes.get(h.id);
   if(!R){R=new Car(h.name,h.color,true,h.model);if(h.look)R.setLook(h.look);R.setLayer(3);R.setLevel(h.lvl||1);
-    const me=players[0].car;R.place(me.pos.x+6+Net.remotes.size*4,me.pos.z,me.yaw);R.netId=h.id;Net.remotes.set(h.id,R);cars.push(R);
+    const me=players[0].car;R.place(me.pos.x+6+Net.remotes.size*4,me.pos.z,me.yaw);R.netId=h.id;Net.remotes.set(h.id,R);cars.push(R);cgRoom(true);
     toast(`🤝 ${h.name} a rejoint la balade !`);if(Net.remotes.size<=1)djSay(`Bienvenue à ${h.name} qui rejoint la balade !`);}
   R.hello=h;R.group=h.group||1;
   return R;
@@ -55327,7 +55334,7 @@ function addPlayer(h){
 function dropPlayer(id,broadcast){
   const R=Net.remotes.get(id);if(Net.host)Net.conns.delete(id);
   endCall(id);
-  if(R){toast(`📴 ${R.name} est parti`);cars=cars.filter(x=>x!==R);R.dispose();if(R.ch)scene.remove(R.ch.g);if(R.pingObj)scene.remove(R.pingObj);Net.remotes.delete(id);
+  if(R){toast(`📴 ${R.name} est parti`);cars=cars.filter(x=>x!==R);R.dispose();if(R.ch)scene.remove(R.ch.g);if(R.pingObj)scene.remove(R.pingObj);Net.remotes.delete(id);cgRoom(true);
     if(Winch.on&&(Winch.car===R||!Winch.anchor))Winch.on=false;}
   if(broadcast&&Net.host)netSend({t:'leave',id});
   if(Net.host)Net.connected=Net.conns.size>0;
@@ -56923,6 +56930,7 @@ function cleanup(){
   for(const id of [...Net.calls.keys()])endCall(id);
   for(const r of Net.remotes.values()){r.dispose();if(r.ch)scene.remove(r.ch.g);if(r.pingObj)scene.remove(r.pingObj);}Net.remotes.clear();
   for(const c of Net.conns.values())try{c.close();}catch(e){}Net.conns.clear();
+  cgRoom(false);
   if(Net.peer){try{Net.peer.destroy();}catch(e){}}Object.assign(Net,{peer:null,conn:null,connected:false,host:false,code:'',myId:'',talking:false,ptt:false,group:1,inviteUrl:''});
   if(Net.stream){Net.stream.getTracks().forEach(t=>t.stop());Net.stream=null;}
   Winch.on=false;Race.active=false;raceFlag.visible=false;lobby(null);
@@ -57052,6 +57060,11 @@ async function loaderTransition(msg,ms=1400){
   // installable comme une appli (pas dans CrazyGames ni en fichier local)
   if('serviceWorker' in navigator&&location.protocol==='https:'&&window.top===window&&!CG.ok){navigator.serviceWorker.register('sw.js').catch(()=>{});}
   const room=cgInviteParam('room');if(room){document.getElementById('jCode').value=room.toUpperCase();}
+  cgCall(s=>{if(s.game.addJoinRoomListener)s.game.addJoinRoomListener(params=>{
+    const code=String((params&&(params.room||params.roomName||params.roomId))||'').toUpperCase().slice(0,8);if(!code)return;
+    if(started){document.getElementById('bQuit').click();}
+    document.getElementById('jCode').value=code;setTimeout(()=>askNick('join'),300);
+  });});
   // CrazyGames : lien d'invitation = on rejoint directement ; « instant multiplayer » = on crée la partie directement
   let instant=false;try{instant=CG.ok&&!!CG.sdk.game.isInstantMultiplayer;}catch(e){}
   if(room&&room.length===4)setTimeout(()=>askNick('join'),500);
