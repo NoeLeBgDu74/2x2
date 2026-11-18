@@ -118,6 +118,14 @@ body.mobile #rName{display:none}body.mobile #radio{gap:4px;padding:4px 6px}
   .tped{width:66px;height:132px}.tped.red{height:70px;font-size:11px}.thand{width:66px;height:50px;font-size:18px}.tpeds{gap:6px}#tMenu{bottom:270px;grid-template-columns:repeat(2,104px)}}
 @media (max-height:520px){.tsteer button{width:78px;height:78px;font-size:32px}.tped{height:118px;width:74px}.tped.red{height:66px}.thand{width:74px;height:46px}#tMenu{bottom:230px}}
 .htabs{grid-column:1/-1;display:flex;gap:6px}.htabs button{font:inherit;font-weight:800;border:3px solid var(--ink);border-radius:10px;background:#fff;padding:4px 10px;cursor:pointer}.htabs button.on{background:#ffd23f}
+#cdash{position:fixed;left:50%;bottom:10px;transform:translateX(-50%);z-index:5;display:flex;align-items:center;gap:8px;padding:6px 10px;background:rgba(20,24,34,.62);border:2px solid rgba(255,255,255,.18);border-radius:18px;backdrop-filter:blur(4px);max-width:98vw}
+#cdash[hidden]{display:none}#cdash canvas{width:150px;height:87px}
+#cdBtns{display:grid;grid-template-columns:repeat(6,58px);gap:5px}
+#cdBtns button{height:40px;border-radius:10px;border:2px solid rgba(255,255,255,.25);background:rgba(255,255,255,.08);color:#fff;cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;line-height:1;padding:2px}
+#cdBtns button span{font-size:16px}#cdBtns button small{font-size:9px;font-weight:800;margin-top:2px;opacity:.85}
+#cdBtns button.on{background:#ffd23f;color:#1d2433;border-color:#ffd23f;box-shadow:0 0 12px rgba(255,210,63,.6)}
+#cdBtns button:hover{border-color:#fff}
+@media (max-width:720px){#cdash{gap:4px;padding:4px 6px}#cdBtns{grid-template-columns:repeat(6,44px);gap:3px}#cdBtns button{height:36px}#cdBtns button small{font-size:7px}#cdash canvas{width:96px;height:56px}}
 #mapBtn{position:fixed;top:10px;right:60px;z-index:5;font-size:20px;width:42px;height:42px;border-radius:50%;border:3px solid var(--ink);background:var(--paper);box-shadow:0 4px 0 var(--ink);cursor:pointer}
 #campBar{position:fixed;left:50%;bottom:18px;transform:translateX(-50%);z-index:6;display:flex;gap:8px;align-items:center;padding:8px 12px}
 #campBar button{font:inherit;font-weight:800;border:3px solid var(--ink);border-radius:12px;background:#ffd23f;padding:6px 10px;cursor:pointer}
@@ -126,7 +134,10 @@ body.mobile #rName{display:none}body.mobile #radio{gap:4px;padding:4px 6px}
 .bmbar{position:absolute;left:50%;bottom:8px;transform:translateX(-50%);display:flex;gap:10px;align-items:center;padding:6px 12px;font-weight:800;white-space:nowrap}
 .bmbar button{font:inherit;font-weight:800;border:3px solid var(--ink);border-radius:12px;background:#fff;padding:4px 10px;cursor:pointer}
 .appRow{display:flex;gap:8px;flex-wrap:wrap;margin:-4px 0 10px}.appRow .big{flex:1;font-size:14px;padding:8px 10px;min-width:120px}.appRow [hidden]{display:none}
-.modeRow{margin:-4px 0 12px}.modeRow .big{width:100%;font-size:16px;padding:10px}
+.modeRow{margin:-4px 0 12px}
+#pGroups{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:6px;margin-top:6px}
+.grpb{font:inherit;text-align:left;border:3px solid var(--ink);border-radius:12px;background:#fff;padding:6px 8px;cursor:pointer}.grpb b{color:var(--gc)}.grpb small{display:block;font-size:11px;opacity:.75}
+.grpb.on{background:#fff3c4;box-shadow:0 3px 0 var(--ink)}.modeRow .big{width:100%;font-size:16px;padding:10px}
 #loading{position:fixed;inset:0;z-index:20;overflow:hidden;background:linear-gradient(#5fb0ec,#bfe6ff 60%);transition:opacity .45s}
 #loading.hide{opacity:0;pointer-events:none}
 .ld-scene{position:absolute;inset:0}
@@ -207,6 +218,7 @@ body.mobile #rName{display:none}body.mobile #radio{gap:4px;padding:4px 6px}
 <button id="mapBtn" hidden title="Grande carte (M)">🗺️</button>
 <div id="campBar" class="panel" hidden><b>🔥 Au coin du feu</b><button id="bStory">📖 Raconte une histoire</button><button id="bSleep">😴 Dormir jusqu'au matin</button></div>
 <div id="fade"></div>
+<div id="cdash" hidden><canvas id="cdSpeed" width="190" height="110"></canvas><div id="cdBtns"></div><canvas id="cdIncl" width="170" height="110"></canvas></div>
 <div id="tuto" class="panel" hidden><div class="trow"><b id="tutoStep">Tuto</b><span class="treco">⭐ recommandé</span><button id="tutoSkip">Passer le tuto ⏭️</button></div><div id="tutoTxt"></div><div class="tbar"><i id="tutoBar"></i></div></div>
 <div id="touch" hidden>
  <div class="tsteer"><button id="tLeft">◀</button><button id="tRight">▶</button></div>
@@ -260,6 +272,7 @@ body.mobile #rName{display:none}body.mobile #radio{gap:4px;padding:4px 6px}
   <h1 style="font-size:46px">PAUSE</h1>
   <div class="row">🔊 Volume général <input id="mVol" type="range" min="0" max="100" value="80"></div>
   <div class="row" id="pCode" hidden>🌐 Code de la partie : <b id="pCodeV" style="font-size:22px;letter-spacing:4px"></b> <button class="big b4" id="pCopy" style="padding:4px 10px;font-size:14px">📋 Copier le lien</button></div>
+  <div class="row" id="pGroupRow" style="display:none">👥 <b>Groupes</b> <small style="opacity:.7">(la radio, le GPS et le convoi marchent avec ton groupe)</small><div id="pGroups"></div></div>
   <div class="row" style="display:block">🚙 <b>Mes véhicules</b> <small style="opacity:.7">(achète-en d'autres au 🔧 garage près du départ)</small><div id="pGarage"></div></div>
   <div class="row">🎵 Musique <select id="mStation"></select> <input id="rVol" type="range" min="0" max="100" value="55"></div>
   <div class="row appRow"><button class="big b4" id="bPhoto">📸 Photo (F2)</button><button class="big b4" id="bFull2">⛶ Plein écran</button><button class="big b4" id="bShare2">🔗 Partager</button></div>
@@ -53542,7 +53555,7 @@ const EN_PAIRS=[
 ['country des pistes','trail country'],['néons & couchers de soleil','neon & sunsets'],['chill pour rouler cool','chill for cruising'],['ça tape dans les bosses','banging over bumps'],['house qui éclabousse','splashy house'],
 ['Radio Poussière','Dust Radio'],['Lo-Fi Sentier','Lo-Fi Trail'],['Électro Boue','Mud Electro'],['silence…','silence…'],
 // --- divers ---
-['à','at'],['🎙️ Tu parles…',"🎙️ You're talking…"],['Tu parles…',"You're talking…"],['🎮 Manette détectée !','🎮 Gamepad detected!'],['poser / enlever un repère','place / remove a marker'],['Téléportation au sommet !','Teleported to the summit!'],['émotes','emotes'],['Émote','Emote'],['Sortir','Exit'],['Treuil','Winch'],['Repère','Marker'],['Aplomb','Upright'],['Warnings','Hazards'],['Blocage','Diff lock'],['Remonter','Get back in'],['frein à main','handbrake'],
+['à','at'],['🎙️ Tu parles…',"🎙️ You're talking…"],['Tu parles…',"You're talking…"],['🎮 Manette détectée !','🎮 Gamepad detected!'],['poser / enlever un repère','place / remove a marker'],['Téléportation au sommet !','Teleported to the summit!'],['Code à donner à tes potes :','Code to give your buddies:'],['en attente… (jusqu\'à','waiting… (up to'],["en attente… (jusqu'à",'waiting… (up to'],['joueurs','players'],['Inviter','Invite'],['Groupe orange','Orange group'],['Groupe bleu','Blue group'],['Groupe violet','Purple group'],['Groupe jaune','Yellow group'],['groupe orange','orange group'],['groupe bleu','blue group'],['groupe violet','purple group'],['groupe jaune','yellow group'],['Groupes','Groups'],['(la radio, le GPS et le convoi marchent avec ton groupe)','(radio, GPS and convoy work with your group)'],['(toi)','(you)'],['vide','empty'],['rejoint le','joins the'],['Tu es dans le','You are in the'],['radio, GPS et convoi avec ce groupe','radio, GPS and convoy with this group'],['La partie est pleine (8 joueurs max)','The game is full (8 players max)'],['La partie est terminée (le créateur est parti)','The game is over (the host left)'],['est parti','left'],['personne dans ton groupe','nobody in your group'],["t'a accroché au treuil !",'hooked you to the winch!'],['ton groupe t\'entend !',"your group can hear you!"],["ton groupe t'entend",'your group can hear you'],['crée une partie et invite tes potes !','create a game and invite your buddies!'],['Frein','Brake'],['Klaxon','Horn'],['Carte','Map'],['GPS ✖','GPS ✖'],['Musique','Music'],['PENTE','PITCH'],['DÉVERS','ROLL'],['GPS effacé','GPS cleared'],['Ça penche beaucoup : attention à ne pas basculer !',"It's leaning a lot: careful not to tip over!"],['émotes','emotes'],['Émote','Emote'],['Sortir','Exit'],['Treuil','Winch'],['Repère','Marker'],['Aplomb','Upright'],['Warnings','Hazards'],['Blocage','Diff lock'],['Remonter','Get back in'],['frein à main','handbrake'],
 ['Ce véhicule n’a pas de portière',"This vehicle has no door"],['Il pleut des vaches !','It\'s raining cows!'],['Mon perso','My character'],['km/h','km/h'],
 ];
 // une seule passe : la plus longue expression d'abord, et uniquement des mots entiers
@@ -54881,7 +54894,7 @@ function makePlayer(car,keys,pad,idx){
   const L=levelOf(p.prof.xp).l;car.setLevel(L);p.lvl=L;
   return p;
 }
-function partnerCar(car){return cars.find(c=>c!==car&&!c.npc)||null;}
+function partnerCar(car){let best=null,bd=1e9;for(const c of cars){if(c===car||c.npc)continue;const pen=(typeof Net!=='undefined'&&Net.connected&&c.remote&&c.group!==Net.group)?1e5:0;const d=c.pos.distanceTo(car.pos)+pen;if(d<bd){bd=d;best=c;}}return best;}
 
 /* =========================================================
    Progression : XP, niveaux, déblocages, missions
@@ -55103,12 +55116,12 @@ function doAction(p,a){
       setPing(p.ping,hit.x,hit.z);p.pingT=90;netSend({t:'ping',x:hit.x,z:hit.z});blip([1200,1500],0.07,'sine',0.12,0.09);
       toast(`📍 ${car.name} a placé un repère (rappuie pour l'enlever)`);break;}
     case'winch':
-      if(Winch.on){Winch.on=false;netSend({t:'winch',on:false});toast('🪝 Treuil détaché');blip([500,300],0.08,'square',0.08);
+      if(Winch.on){netSend({t:'winch',on:false,target:Winch.other&&Winch.other.netId||null,an:Winch.anchor?ANCHORS.indexOf(Winch.anchor):undefined});Winch.on=false;Winch.other=null;toast('🪝 Treuil détaché');blip([500,300],0.08,'square',0.08);
         if(Winch.t>6)for(const q of players)addXP(q,40,'DÉPANNAGE 🪝','#ff8a3d');break;}
       {const an=nearestAnchor(car),dp=other?car.pos.distanceTo(other.pos):1e9,da=an?Math.hypot(an.x-car.pos.x,an.z-car.pos.z):1e9;
         if(dp>28&&!an){toast(other?`🪝 Trop loin (${Math.round(dp)} m, max 28) · ou approche-toi d'un arbre à sangle jaune`:'🪝 Approche-toi de ton pote ou d\u2019un arbre à sangle jaune');break;}
         if(an&&da<dp){Winch.on=true;Winch.t=0;Winch.anchor=an;Winch.car=car;Winch.len=Math.max(6,da);netSend({t:'winch',on:true,len:Winch.len,an:ANCHORS.indexOf(an)});toast('🌲 Treuil accroché à l\u2019arbre ! Il s\u2019enroule : accélère doucement');}
-        else{Winch.on=true;Winch.t=0;Winch.anchor=null;Winch.car=null;Winch.len=Math.max(8,dp);netSend({t:'winch',on:true,len:Winch.len});toast('🪝 Treuil accroché au pote ! Il s\u2019enroule tout seul');}
+        else{Winch.on=true;Winch.t=0;Winch.anchor=null;Winch.car=null;Winch.other=other;Winch.len=Math.max(8,dp);netSend({t:'winch',on:true,len:Winch.len,target:other.netId||null});toast('🪝 Treuil accroché au pote ! Il s\u2019enroule tout seul');}
         blip([300,500],0.08,'square',0.08);}
       break;
   }
@@ -55219,93 +55232,153 @@ function updateSky(dt){
 /* =========================================================
    Réseau (PeerJS) + talkie-walkie
    ========================================================= */
-const Net={peer:null,conn:null,host:false,code:'',connected:false,call:null,stream:null,audio:null,talking:false,remoteTalking:false,lastSend:0,remote:null};
-const ID_PREFIX='duopiste-v1-';
+/* =========================================================
+   Réseau : parties jusqu'à 8 joueurs (le créateur relaie), groupes d'amis
+   ========================================================= */
+const MAX_PLAYERS=8;
+const GROUPS=[null,{name:'Groupe orange',col:0xff8a3d},{name:'Groupe bleu',col:0x2ec4b6},{name:'Groupe violet',col:0x9b5de5},{name:'Groupe jaune',col:0xffd23f}];
+const Net={peer:null,conn:null,conns:new Map(),host:false,code:'',connected:false,myId:'',remotes:new Map(),calls:new Map(),stream:null,talking:false,lastSend:0,group:1,inviteUrl:''};
+Object.defineProperty(Net,'remote',{get(){let best=null,bd=1e9;const me=players[0]&&players[0].car;for(const r of Net.remotes.values()){if(r.group!==Net.group)continue;const d=me?r.pos.distanceTo(me.pos):0;if(d<bd){bd=d;best=r;}}if(!best)for(const r of Net.remotes.values()){best=r;break;}return best;}});
+const ID_PREFIX='duopiste-v2-';
 function genCode(){const A='ABCDEFGHJKLMNPQRSTUVWXYZ23456789';let s='';for(let i=0;i<4;i++)s+=A[Math.floor(Math.random()*A.length)];return s;}
-function netSend(m){if(Net.connected&&Net.conn&&Net.conn.open){try{Net.conn.send(m);}catch(e){}}}
+const groupOf=car=>car.remote?car.group:Net.group;
+const sameGroup=car=>!Net.connected||!car.remote||car.group===Net.group;
+// envoi : le client parle à l'hôte ; l'hôte diffuse à tout le monde
+function netSend(m){
+  if(!Net.connected)return;
+  if(Net.host){m.from=Net.myId;for(const c of Net.conns.values())if(c.open)try{c.send(m);}catch(e){}}
+  else if(Net.conn&&Net.conn.open)try{Net.conn.send(m);}catch(e){}
+}
+function relay(m,exceptId){for(const [id,c] of Net.conns)if(id!==exceptId&&c.open)try{c.send(m);}catch(e){}}
 function lobby(html){const l=document.getElementById('lobby');if(!html){l.hidden=true;}else{l.innerHTML=html;l.hidden=false;}
-  // le tuto et les messages se placent sous le bandeau du code
   requestAnimationFrame(()=>document.documentElement.style.setProperty('--lobH',(l.hidden?0:l.offsetHeight+8)+'px'));}
+function lobbyStatus(){
+  const n=Net.remotes.size+1;
+  if(!Net.connected&&Net.host){lobby(`🌐 Code à donner à tes potes : <span class="code">${Net.code}</span> <button id="bInvite">📋 Copier le lien</button><span style="opacity:.6">en attente… (jusqu'à ${MAX_PLAYERS} joueurs)</span>`);bindInvite();return;}
+  if(!Net.connected){lobby(null);return;}
+  lobby(`🌐 Partie <b>${Net.code}</b> · ${n}/${MAX_PLAYERS} joueurs · <span style="color:${css(GROUPS[Net.group].col)}">● ${GROUPS[Net.group].name}</span> ${Net.host?'<button id="bInvite">📋 Inviter</button>':''}${Net.stream?' · 📻':' <button id="bTalk">📻 Allumer la radio CB (micro)</button>'}`);
+  bindInvite();const bt=document.getElementById('bTalk');if(bt)bt.onclick=()=>{Net.open=true;enableTalkie();};
+}
+function bindInvite(){const b=document.getElementById('bInvite');if(b)b.onclick=()=>{const u=Net.inviteUrl||(location.href.split('?')[0]+'?room='+Net.code);try{navigator.clipboard.writeText(u);toast('🔗 Lien copié !');}catch(e){toast(u);}};}
+function myHello(){const me=players[0].car,p0=players[0];return{t:'hello',id:Net.myId,look:me.look,name:me.name,color:me.color,model:me.model,lvl:p0.lvl,group:Net.group};}
 function netHost(){
   if(!window.Peer){toast('Le mode en ligne est indisponible ici 😕');return;}
-  Net.host=true;Net.code=genCode();
-  Net.peer=new Peer(ID_PREFIX+Net.code,{debug:0,config:ICE});
+  Net.host=true;Net.code=genCode();Net.myId=ID_PREFIX+Net.code;Net.group=1;
+  Net.peer=new Peer(Net.myId,{debug:0,config:ICE});
   Net.peer.on('open',()=>{
-    lobby(`🌐 Code à donner à ton pote : <span class="code">${Net.code}</span> <button id="bInvite">📋 Copier le lien</button><span style="opacity:.6">en attente du pote…</span>`);
-    cgCall(s=>{const u=s.game.inviteLink({room:Net.code});Net.inviteUrl=u;});
-    cgCall(s=>s.game.showInviteButton({room:Net.code}));
-    document.getElementById('bInvite').onclick=()=>{const u=Net.inviteUrl||(location.href.split('?')[0]+'?room='+Net.code);try{navigator.clipboard.writeText(u);toast('🔗 Lien copié !');}catch(e){toast(u);}};
+    cgCall(s=>{Net.inviteUrl=s.game.inviteLink({room:Net.code});});cgCall(s=>s.game.showInviteButton({room:Net.code}));
+    lobbyStatus();
   });
-  Net.peer.on('connection',c=>{if(Net.conn&&Net.connected){c.close();return;}setupConn(c);});
+  Net.peer.on('connection',c=>{
+    c.on('open',()=>{
+      if(Net.conns.size>=MAX_PLAYERS-1){try{c.send({t:'full'});}catch(e){}setTimeout(()=>c.close(),300);return;}
+      Net.conns.set(c.peer,c);Net.connected=true;
+      // bienvenue : la liste des joueurs déjà là + l'état du monde
+      const roster=[myHello(),...[...Net.remotes.values()].map(r=>r.hello)];
+      c.send({t:'welcome',roster,dayT,radio:Radio.st,balises:[...collected],from:Net.myId});
+    });
+    c.on('data',m=>{if(!m||!m.t)return;m.from=c.peer;onNet(m);
+      // positions relayées tout de suite (même si l'onglet du créateur est en arrière-plan)
+      if(m.t==='s'){const st=Object.assign({},m);delete st.t;delete st.from;relay({t:'S',a:{[c.peer]:st}},c.peer);}else relay(m,c.peer);});
+    c.on('close',()=>dropPlayer(c.peer,true));c.on('error',()=>dropPlayer(c.peer,true));
+  });
   Net.peer.on('call',onCall);
-  Net.peer.on('error',e=>{if(e.type==='unavailable-id'){Net.peer.destroy();netHost();}else toast('Réseau : '+(e.type||'erreur'));});
+  Net.peer.on('error',e=>{if(e.type==='unavailable-id'){Net.peer.destroy();netHost();}else if(e.type!=='peer-unavailable')toast('Réseau : '+(e.type||'erreur'));});
 }
 function netJoin(code){
   if(!window.Peer){toast('Le mode en ligne est indisponible ici 😕');return;}
   Net.host=false;Net.code=code.toUpperCase();
   lobby(`🔗 Connexion à la partie <b>${Net.code}</b>…`);
   Net.peer=new Peer({debug:0,config:ICE});
-  Net.peer.on('open',()=>setupConn(Net.peer.connect(ID_PREFIX+Net.code,{reliable:true})));
-  Net.peer.on('call',onCall);
-  Net.peer.on('error',e=>{toast(e.type==='peer-unavailable'?'❌ Partie introuvable, vérifie le code':'Réseau : '+(e.type||'erreur'));lobby(null);});
-}
-function setupConn(c){
-  Net.conn=c;
-  c.on('open',()=>{Net.connected=true;const me=players[0].car;
-    c.send({t:'hello',look:me.look,name:me.name,color:me.color,model:me.model,lvl:players[0].lvl,host:Net.host,dayT,radio:Radio.st,balises:[...collected]});
-    lobby(`🌐 Partie <b>${Net.code}</b> · connecté ✅ <button id="bTalk">📻 Allumer la radio CB (micro)</button>`);
-    document.getElementById('bTalk').onclick=()=>{Net.open=true;enableTalkie();};cbStatus();
-    // on demande le micro tout de suite : la radio marche sans rien régler
-    if(Net.stream)callPartner();else if(Net.open)enableTalkie();
-    cgCall(s=>s.game.hideInviteButton());
+  Net.peer.on('open',id=>{Net.myId=id;const c=Net.peer.connect(ID_PREFIX+Net.code,{reliable:true});Net.conn=c;
+    c.on('open',()=>{Net.connected=true;c.send(myHello());lobbyStatus();if(Net.open)enableTalkie();cgCall(s=>s.game.hideInviteButton());});
+    c.on('data',m=>{if(m&&m.t)onNet(m);});
+    c.on('close',()=>{toast('📴 La partie est terminée (le créateur est parti)');for(const id of [...Net.remotes.keys()])dropPlayer(id,false);Net.connected=false;Net.conn=null;lobby(null);cbStatus();});
   });
-  c.on('data',onNet);
-  c.on('close',()=>{Net.connected=false;Net.hearing=false;Net.call=null;toast('📴 Ton pote s\'est déconnecté');if(Net.remote){cars=cars.filter(x=>x!==Net.remote);Net.remote.dispose();Net.remote=null;}Winch.on=false;if(Net.host)lobby(`🌐 Code : <b>${Net.code}</b> · en attente…`);else lobby(null);Net.conn=null;});
+  Net.peer.on('call',onCall);
+  Net.peer.on('error',e=>{toast(e.type==='peer-unavailable'?'❌ Partie introuvable, vérifie le code':'Réseau : '+(e.type||'erreur'));if(!Net.connected)lobby(null);});
+}
+function addPlayer(h){
+  if(!h||!h.id||h.id===Net.myId)return null;
+  let R=Net.remotes.get(h.id);
+  if(!R){R=new Car(h.name,h.color,true,h.model);if(h.look)R.setLook(h.look);R.setLayer(3);R.setLevel(h.lvl||1);
+    const me=players[0].car;R.place(me.pos.x+6+Net.remotes.size*4,me.pos.z,me.yaw);R.netId=h.id;Net.remotes.set(h.id,R);cars.push(R);
+    toast(`🤝 ${h.name} a rejoint la balade !`);if(Net.remotes.size<=1)djSay(`Bienvenue à ${h.name} qui rejoint la balade !`);}
+  R.hello=h;R.group=h.group||1;
+  return R;
+}
+function dropPlayer(id,broadcast){
+  const R=Net.remotes.get(id);if(Net.host)Net.conns.delete(id);
+  endCall(id);
+  if(R){toast(`📴 ${R.name} est parti`);cars=cars.filter(x=>x!==R);R.dispose();if(R.ch)scene.remove(R.ch.g);if(R.pingObj)scene.remove(R.pingObj);Net.remotes.delete(id);
+    if(Winch.on&&(Winch.car===R||!Winch.anchor))Winch.on=false;}
+  if(broadcast&&Net.host)netSend({t:'leave',id});
+  if(Net.host)Net.connected=Net.conns.size>0;
+  lobbyStatus();cbStatus();
 }
 function onNet(m){
   if(!m||!m.t)return;
-  const R=Net.remote;
+  const R=m.from?Net.remotes.get(m.from):null;
   switch(m.t){
-    case'hello':
-      if(!Net.remote){Net.remote=new Car(m.name,m.color,true,m.model);if(m.look)Net.remote.setLook(m.look);Net.remote.setLayer(3);Net.remote.setLevel(m.lvl||1);Net.remote.place(players[0].car.pos.x+6,players[0].car.pos.z,players[0].car.yaw);cars.push(Net.remote);}
-      toast(`🤝 ${m.name} a rejoint la balade !`);djSay(`Bienvenue à ${m.name} qui rejoint la balade !`);
-      if(!Net.host&&m.host){dayT=m.dayT;setStation(m.radio,false,true);(m.balises||[]).forEach(i=>collectBalise(i,m.name,true));}
-      break;
-    case's':if(R){R.target=m;R.target.at=performance.now();remoteFoot(R,m);R.doorOpen=m.dr||0;R.hazard=!!m.hz;}break;
-    case'foot':break;
+    case'welcome':
+      (m.roster||[]).forEach(addPlayer);dayT=m.dayT;setStation(m.radio,false,true);(m.balises||[]).forEach(i=>collectBalise(i,'',true));
+      lobbyStatus();voiceSync();break;
+    case'full':toast('🚫 La partie est pleine (8 joueurs max)');lobby(null);break;
+    case'hello':addPlayer(Object.assign({},m,{id:m.from||m.id}));voiceSync();lobbyStatus();break;
+    case'leave':dropPlayer(m.id,false);break;
+    case'grp':if(R){R.group=m.g;if(R.hello)R.hello.group=m.g;toast(`👥 ${R.name} rejoint le ${GROUPS[m.g].name.toLowerCase()}`);voiceSync();lobbyStatus();}break;
+    case's':if(R)applyState(R,m);break;
+    case'S':for(const [id,st] of Object.entries(m.a||{})){if(id===Net.myId)continue;const r=Net.remotes.get(id);if(r)applyState(r,st);}break;
     case'emote':if(R){R.emote=m.e;R.emoteT=3.5;blip([660,990],0.06,'triangle',0.06,0.06);}break;
-    case'ping':if(R){if(!R.pingObj)R.pingObj=makeBeam(R.color);if(m.off){R.pingObj.visible=false;R.pingT=0;break;}setPing(R.pingObj,m.x,m.z);R.pingT=90;toast(`📍 ${R.name} a placé un repère`);blip([1200,1500],0.07,'sine',0.1,0.09);}break;
-    case'cb':if(R)sendCB(R,m.i,true);break;
+    case'ping':if(R&&R.group===Net.group){if(!R.pingObj)R.pingObj=makeBeam(R.color);if(m.off){R.pingObj.visible=false;R.pingT=0;break;}setPing(R.pingObj,m.x,m.z);R.pingT=90;toast(`📍 ${R.name} a placé un repère`);blip([1200,1500],0.07,'sine',0.1,0.09);}break;
+    case'cb':if(R&&R.group===Net.group)sendCB(R,m.i,true);break;
     case'color':if(R){R.color=m.c;R.setModel(R.model);}break;
-    case'gps':setGPS(m.off?null:m.x,m.off?null:m.z,true);break;
+    case'gps':if(!R||R.group===Net.group)setGPS(m.off?null:m.x,m.off?null:m.z,true);break;
     case'woodTake':{const w=CAMP.wood.find(w=>Math.abs(w.x-m.x)<0.5&&Math.abs(w.z-m.z)<0.5);if(w){w.taken=true;w.t=240;updateWoodMesh();}}break;
     case'campWood':CAMP.spots[m.i].wood=m.w;setPile(m.i);toast(`🪵 ${R?R.name:'Ton pote'} a déposé du bois au camp (${m.w}/${CAMP.need})`);break;
     case'fire':lightFire(m.i,R?R.name:'Ton pote',true);break;
     case'sleep':sleepTillMorning(true);break;
-    case'story':break;
     case'proDone':toast(`🏁 ${m.name} a fini le parcours PRO en ${fmtT(m.time)} !`);break;
     case'npc':if(!Net.host)npcFromNet(m.a);break;
     case'npcHi':{const c=NPCS[m.i];if(c){c.emote='👋';c.emoteT=3.5;if(m.m){c.cbMsg=m.m;c.cbT=4;}}}break;
     case'model':if(R&&MODELS[m.m]){R.setModel(m.m);toast(`${MODELS[m.m].icon} ${R.name} prend le ${MODELS[m.m].name} !`);}break;
     case'lvl':if(R){R.setLevel(m.l);toast(`🎉 ${R.name} passe niveau ${m.l} !`);}break;
-
-    case'winch':Winch.on=m.on;if(m.len)Winch.len=m.len;Winch.anchor=m.an!=null?ANCHORS[m.an]:null;Winch.car=m.an!=null?Net.remote:null;toast(m.on?'🪝 Treuil accroché !':'🪝 Treuil détaché');break;
+    case'winch':{if(!R)break;const meTarget=m.target===Net.myId;
+      if(m.an!=null){if(m.on){R.winch={anchor:ANCHORS[m.an]};}else R.winch=null;}
+      else if(meTarget){Winch.on=m.on;if(m.len)Winch.len=m.len;Winch.anchor=null;Winch.car=null;Winch.other=R;toast(m.on?`🪝 ${R.name} t'a accroché au treuil !`:'🪝 Treuil détaché');}
+      else R.winch=m.on?{to:m.target}:null;}break;
+    case'bump':if(m.to===Net.myId&&players[0]){const c=players[0].car;c.vx+=m.ix||0;c.vz+=m.iz||0;}break;
     case'balise':collectBalise(m.i,m.who,true);break;
     case'race':startRace(m);break;
     case'raceWin':raceWin(m.name,true);break;
-    case'time':dayT=m.v;break;
-    case'talk':Net.remoteTalking=m.on;cbSquelch(m.on);cbStatus();break;
+    case'time':if(!Net.host)dayT=m.v;break;
+    case'talk':if(R){R.talking=m.on;if(R.group===Net.group)cbSquelch(m.on);cbStatus();}break;
   }
 }
-function netTick(){
-  if(!Net.connected)return;const now=performance.now();if(now-Net.lastSend<50)return;Net.lastSend=now;
-  const c=players[0].car;
-  const P0=players[0],F=P0.onFoot&&P0.ch?{o:1,cx:+P0.ch.g.position.x.toFixed(2),cy:+P0.ch.g.position.y.toFixed(2),cz:+P0.ch.g.position.z.toFixed(2),cyw:+P0.chYaw.toFixed(2),ca:P0.chState||0}:{o:0};
-  netSend({...F,lm:c.lightMode||0,pk:c.park?1:0,dr:c.doorOpen||0,lw:c.low?1:0,hz:c.hazard?1:0,t:'s',x:+c.pos.x.toFixed(2),y:+c.pos.y.toFixed(2),z:+c.pos.z.toFixed(2),yaw:+c.yaw.toFixed(3),p:+c.pitch.toFixed(3),r:+c.roll.toFixed(3),st:+c.steer.toFixed(2),vx:+c.vx.toFixed(2),vz:+c.vz.toFixed(2),vy:+c.vy.toFixed(2),vf:+c.vf.toFixed(2),l:c.lights,h:c.horn,b:c.brake,th:c.thr,sl:+c.slip.toFixed(1),ss:+c.spinSlip.toFixed(2),c:c.contact});
-  if(Math.random()<0.01&&Net.host)netSend({t:'time',v:dayT});
+function applyState(R,m){R.target=m;R.target.at=performance.now();remoteFoot(R,m);R.doorOpen=m.dr||0;R.hazard=!!m.hz;if(m.g&&m.g!==R.group){R.group=m.g;voiceSync();}}
+function myState(){
+  const c=players[0].car,P0=players[0],F=P0.onFoot&&P0.ch?{o:1,cx:+P0.ch.g.position.x.toFixed(2),cy:+P0.ch.g.position.y.toFixed(2),cz:+P0.ch.g.position.z.toFixed(2),cyw:+P0.chYaw.toFixed(2),ca:P0.chState||0}:{o:0};
+  return{...F,g:Net.group,lm:c.lightMode||0,pk:c.park?1:0,dr:c.doorOpen||0,lw:c.low?1:0,hz:c.hazard?1:0,x:+c.pos.x.toFixed(2),y:+c.pos.y.toFixed(2),z:+c.pos.z.toFixed(2),yaw:+c.yaw.toFixed(3),p:+c.pitch.toFixed(3),r:+c.roll.toFixed(3),st:+c.steer.toFixed(2),vx:+c.vx.toFixed(2),vz:+c.vz.toFixed(2),vy:+c.vy.toFixed(2),vf:+c.vf.toFixed(2),l:c.lights,h:c.horn,b:c.brake,th:c.thr,sl:+c.slip.toFixed(1),ss:+c.spinSlip.toFixed(2),c:c.contact};
 }
-/* ---------- Radio CB : vraie voix entre les deux joueurs ---------- */
-// serveurs STUN + relais TURN publics : la voix passe même derrière les box strictes
+function netTick(){
+  if(!Net.connected)return;const now=performance.now();
+  if(Net.host){if(now-Net.lastSend<70)return;Net.lastSend=now;
+    // un seul paquet avec la position de tout le monde
+    netSend({t:'S',a:{[Net.myId]:myState()}});if(Math.random()<0.01)netSend({t:'time',v:dayT});}
+  else{if(now-Net.lastSend<60)return;Net.lastSend=now;netSend({t:'s',...myState()});}
+}
+function setGroup(g){
+  if(g===Net.group)return;Net.group=g;netSend({t:'grp',g});voiceSync();lobbyStatus();renderGroups();
+  toast(`👥 Tu es dans le ${GROUPS[g].name.toLowerCase()} : radio, GPS et convoi avec ce groupe`);
+}
+function renderGroups(){
+  const el=document.getElementById('pGroups');if(!el)return;
+  const row=document.getElementById('pGroupRow');row.hidden=!Net.connected&&!Net.peer;
+  const list=g=>[...(g===Net.group?[players[0]&&players[0].car.name+' (toi)']:[]),...[...Net.remotes.values()].filter(r=>r.group===g).map(r=>r.name)].filter(Boolean);
+  el.innerHTML=[1,2,3,4].map(g=>`<button class="grpb${g===Net.group?' on':''}" data-g="${g}" style="--gc:${css(GROUPS[g].col)}"><b>● ${GROUPS[g].name}</b><small>${list(g).join(', ')||'vide'}</small></button>`).join('');
+  el.querySelectorAll('.grpb').forEach(b=>b.onclick=()=>setGroup(+b.dataset.g));
+}
+/* ---------- Radio CB : voix entre les membres du groupe ---------- */
 const ICE={iceServers:[
   {urls:['stun:stun.l.google.com:19302','stun:stun1.l.google.com:19302']},
   {urls:'stun:global.stun.twilio.com:3478'},
@@ -55313,46 +55386,52 @@ const ICE={iceServers:[
   {urls:'turn:openrelay.metered.ca:443',username:'openrelayproject',credential:'openrelayproject'},
   {urls:'turn:openrelay.metered.ca:443?transport=tcp',username:'openrelayproject',credential:'openrelayproject'},
 ]};
-Net.open=store.get('micOpen',true);   // micro ouvert (comme un appel) par défaut
-Net.ptt=false;
+Net.open=store.get('micOpen',true);Net.ptt=false;
 async function enableTalkie(){
-  if(Net.stream){return true;}
+  if(Net.stream){voiceSync();return true;}
   if(Net._asking)return false;Net._asking=true;
   try{
     Net.stream=await navigator.mediaDevices.getUserMedia({audio:{echoCancellation:true,noiseSuppression:true,autoGainControl:true}});
     applyMic();
     if(AC){try{const src=AC.createMediaStreamSource(Net.stream);Net.meMeter=AC.createAnalyser();Net.meMeter.fftSize=512;src.connect(Net.meMeter);}catch(e){}}
-    callPartner();
-    toast(Net.open?'📻 Radio CB allumée : ton pote t\'entend ! (🎙️ pour couper)':'📻 Radio CB allumée : maintiens V pour parler');
-    const b=document.getElementById('bTalk');if(b)b.remove();
-    if(Net.connected)lobby(`🌐 Partie <b>${Net.code}</b> · connecté ✅ · 📻 radio CB allumée`);
-    cbStatus();return true;
+    voiceSync();
+    toast(Net.open?'📻 Radio CB allumée : ton groupe t\'entend ! (🎙️ pour couper)':'📻 Radio CB allumée : maintiens V pour parler');
+    lobbyStatus();cbStatus();return true;
   }catch(e){
     toast('🎙️ Micro refusé : autorise le micro (icône 🔒 dans la barre d\'adresse) puis clique sur 🎙️');
     return false;
   }finally{Net._asking=false;}
 }
-function callPartner(){
-  if(!Net.stream||!Net.connected||!Net.peer)return;
-  const remoteId=Net.host?Net.conn.peer:ID_PREFIX+Net.code;
-  try{const call=Net.peer.call(remoteId,Net.stream);if(call)attachCall(call);}catch(e){}
+// appels vocaux : un par membre du groupe ; c'est l'identifiant le plus petit qui appelle
+function voiceSync(){
+  if(!Net.peer)return;
+  for(const [id,r] of Net.remotes){
+    const want=r.group===Net.group,has=Net.calls.has(id);
+    if(!want&&has)endCall(id);
+    if(want&&!has&&Net.stream&&Net.myId<id){try{const call=Net.peer.call(id,Net.stream);if(call)attachCall(id,call);}catch(e){}}
+  }
+  cbStatus();
 }
-function onCall(call){call.answer(Net.stream||undefined);attachCall(call);}
-function attachCall(call){
-  if(Net.call&&Net.call!==call){const old=Net.call;Net.call=null;try{old.close();}catch(e){}}
-  Net.call=call;
+function onCall(call){
+  const R=Net.remotes.get(call.peer);
+  if(R&&R.group!==Net.group){try{call.close();}catch(e){}return;}
+  call.answer(Net.stream||undefined);attachCall(call.peer,call);
+}
+function attachCall(id,call){
+  const old=Net.calls.get(id);if(old&&old.call!==call){try{old.call.close();}catch(e){}}
+  const v={call,audio:null,meter:null};Net.calls.set(id,v);
   call.on('stream',s=>{
-    // lecture directe dans un vrai lecteur audio : le plus fiable sur tous les navigateurs
-    if(!Net.audio){Net.audio=document.createElement('audio');Net.audio.autoplay=true;Net.audio.setAttribute('playsinline','');Net.audio.style.display='none';document.body.appendChild(Net.audio);}
-    Net.audio.muted=false;Net.audio.volume=1;Net.audio.srcObject=s;
-    Net.audio.play().catch(()=>{toast('🔈 Clique n\'importe où pour entendre ton pote');Net.needPlay=true;});
-    if(AC){try{const src=AC.createMediaStreamSource(s);Net.himMeter=AC.createAnalyser();Net.himMeter.fftSize=512;src.connect(Net.himMeter);}catch(e){}}
-    Net.hearing=true;cbStatus();
+    v.audio=document.createElement('audio');v.audio.autoplay=true;v.audio.setAttribute('playsinline','');v.audio.style.display='none';document.body.appendChild(v.audio);
+    v.audio.srcObject=s;v.audio.play().catch(()=>{toast('🔈 Clique n\'importe où pour entendre ton pote');Net.needPlay=true;});
+    if(AC){try{const src=AC.createMediaStreamSource(s);v.meter=AC.createAnalyser();v.meter.fftSize=512;src.connect(v.meter);}catch(e){}}
+    cbStatus();
   });
-  const retry=()=>{if(Net.call===call){Net.call=null;Net.hearing=false;cbStatus();if(Net.connected&&Net.stream)setTimeout(()=>{if(!Net.call)callPartner();},1500);}};
-  call.on('close',retry);call.on('error',retry);
+  const gone=()=>{if(Net.calls.get(id)===v){if(v.audio)v.audio.remove();Net.calls.delete(id);cbStatus();
+    const R=Net.remotes.get(id);if(R&&R.group===Net.group&&Net.stream)setTimeout(voiceSync,1500);}};
+  call.on('close',gone);call.on('error',gone);
 }
-addEventListener('pointerdown',()=>{if(Net.needPlay&&Net.audio){Net.audio.play().then(()=>{Net.needPlay=false;}).catch(()=>{});}if(AC&&AC.state!=='running')AC.resume();},true);
+function endCall(id){const v=Net.calls.get(id);if(!v)return;Net.calls.delete(id);try{v.call.close();}catch(e){}if(v.audio)v.audio.remove();}
+addEventListener('pointerdown',()=>{if(Net.needPlay){for(const v of Net.calls.values())if(v.audio)v.audio.play().catch(()=>{});Net.needPlay=false;}if(AC&&AC.state!=='running')AC.resume();},true);
 function applyMic(){
   const on=!!(Net.stream&&(Net.open||Net.ptt));
   if(Net.stream)Net.stream.getAudioTracks().forEach(t=>t.enabled=on);
@@ -55360,20 +55439,17 @@ function applyMic(){
     if(radioBus&&AC)radioBus.gain.setTargetAtTime(Radio.vol*(on?0.12:0.55),AC.currentTime,0.1);}
   cbStatus();
 }
-// V maintenu = parler (même si le micro ouvert est coupé)
 function talk(on){
-  if(!Net.connected){if(on&&started)toast(players.length===2?'📻 À deux sur le même écran : utilise les messages rapides 1-6 (pavé num. pour le pilote 2)':'📻 La radio CB marche en ligne : crée une partie et invite ton pote !');return;}
+  if(!Net.connected){if(on&&started)toast(players.length===2?'📻 À deux sur le même écran : utilise les messages rapides 1-6 (pavé num. pour le pilote 2)':'📻 La radio CB marche en ligne : crée une partie et invite tes potes !');return;}
   if(on&&!Net.stream){enableTalkie().then(ok=>{if(ok){Net.ptt=keys.has('KeyV');applyMic();}});return;}
   Net.ptt=on;applyMic();
 }
-// bouton 🎙️ = couper / rallumer le micro ouvert
 async function toggleMic(){
   if(!Net.connected){talk(true);return;}
   if(!Net.stream){Net.open=true;store.set('micOpen',true);await enableTalkie();return;}
   Net.open=!Net.open;store.set('micOpen',Net.open);applyMic();
-  toast(Net.open?'🎙️ Micro ouvert : ton pote t\'entend':'🔇 Micro coupé (maintiens V pour parler)');
+  toast(Net.open?'🎙️ Micro ouvert : ton groupe t\'entend':'🔇 Micro coupé (maintiens V pour parler)');
 }
-// « kchhh » + bip de fin, comme une vraie CB
 function cbSquelch(start){
   if(!AC)return;const t=AC.currentTime,n=AC.createBufferSource();n.buffer=NOISE;const f=AC.createBiquadFilter(),g=AC.createGain();
   f.type='bandpass';f.frequency.value=2200;f.Q.value=0.7;env(g,t,0.005,0.1,start?0.12:0.2);n.connect(f).connect(g).connect(sfxBus);n.start(t,Math.random());n.stop(t+0.3);
@@ -55381,23 +55457,25 @@ function cbSquelch(start){
 }
 function level(an){if(!an)return 0;const d=new Uint8Array(an.fftSize);an.getByteTimeDomainData(d);let m=0;for(let i=0;i<d.length;i++){const v=Math.abs(d[i]-128);if(v>m)m=v;}return Math.min(1,m/60);}
 setInterval(()=>{
-  const me=Net.talking?level(Net.meMeter):0,him=level(Net.himMeter);
+  const me=Net.talking?level(Net.meMeter):0;let him=0;for(const v of Net.calls.values())him=Math.max(him,level(v.meter));
   const a=document.querySelector('#vuMe b'),b=document.querySelector('#vuHim b');
   if(a)a.style.width=Math.round(me*100)+'%';if(b)b.style.width=Math.round(him*100)+'%';
-  const speak=him>0.12;if(speak!==Net._himSpeak){Net._himSpeak=speak;document.getElementById('cbLed').className=Net.talking?'tx':(speak||Net.remoteTalking)?'rx':'';}
+  const speak=him>0.12;if(speak!==Net._himSpeak){Net._himSpeak=speak;const led=document.getElementById('cbLed');if(led)led.className=Net.talking?'tx':speak?'rx':'';}
 },90);
 function cbStatus(){
-  const led=document.getElementById('cbLed'),st=document.getElementById('cbStat'),bt=document.getElementById('cbTalk'),vu=document.getElementById('vu');
-  led.className=Net.talking?'tx':Net.remoteTalking?'rx':'';
+  const led=document.getElementById('cbLed'),st=document.getElementById('cbStat'),bt=document.getElementById('cbTalk'),vu=document.getElementById('vu');if(!st)return;
+  const talkers=[...Net.remotes.values()].filter(r=>r.talking&&r.group===Net.group);
+  led.className=Net.talking?'tx':talkers.length?'rx':'';
   bt.classList.toggle('on',!!(Net.stream&&Net.talking));bt.classList.toggle('pulse',Net.connected&&!Net.stream);
   bt.textContent=Net.stream&&!Net.open&&!Net.ptt?'🔇':'🎙️';
   bt.title=Net.stream?(Net.open?'Couper le micro':'Rallumer le micro'):'Allumer le micro';
   if(vu)vu.hidden=!Net.connected;
-  const who=Net.remote?Net.remote.name:'ton pote';
+  const grp=[...Net.remotes.values()].filter(r=>r.group===Net.group).map(r=>r.name);
   if(!Net.connected)st.textContent=players.length===2?'messages rapides : 1-6 / pavé num. 1-6':'en ligne : parle avec ton pote · 1-6 messages';
   else if(!Net.stream)st.textContent='clique 🎙️ pour allumer le micro';
   else if(Net.ptt)st.textContent='🔴 tu parles…';
-  else if(Net.open)st.textContent=Net.hearing?`🟢 en ligne avec ${who}`:`🟡 connexion de la voix…`;
+  else if(talkers.length)st.textContent=`📡 ${talkers[0].name} parle…`;
+  else if(Net.open)st.textContent=grp.length?(Net.calls.size?`🟢 en ligne avec ${grp.join(', ')}`:'🟡 connexion de la voix…'):'personne dans ton groupe';
   else st.textContent='🔇 micro coupé · maintiens V pour parler';
 }
 
@@ -55432,11 +55510,14 @@ function drawHUD(){
     // vitesse
     const kmh=Math.round(Math.hypot(car.vx,car.vz)*3.6);
     hx.save();
+    // vitesse (en vue intérieure, c'est le tableau de bord qui l'affiche)
+    if(!(document.body.classList.contains('cockpit')&&p===players[0])){
     const bx=TOUCH.on?r.x+16:r.x+16,by=TOUCH.on?r.y+r.h-215:r.y+r.h-16-88*sm;
     rr(bx,by,170*sm,88*sm,18*sm);hx.fillStyle='rgba(255,248,236,.92)';hx.fill();hx.lineWidth=3;hx.strokeStyle='#1d2433';hx.stroke();
     hx.fillStyle='#1d2433';hx.textAlign='left';hx.textBaseline='alphabetic';hx.font=`900 ${44*sm}px "Trebuchet MS",sans-serif`;hx.fillText(kmh,bx+14*sm,by+50*sm);
     hx.font=`800 ${14*sm}px "Trebuchet MS",sans-serif`;hx.fillText('km/h',bx+(kmh>99?96:kmh>9?72:46)*sm,by+50*sm);
     hx.fillStyle=css(car.color);hx.fillText((car.depth>0.1?'💧 Eau':SURF[car.surf].name)+(car.lights?'  💡':'')+(Winch.on?'  🪝':''),bx+14*sm,by+75*sm);
+    }
     // nom + balises
     const ty=players.length===2?r.y+62:r.y+12;
     let tx=r.x+14;tx+=pill(tx,ty,`${car.name}`,css(car.color),'#fff',16*Math.max(0.8,sm))+8;
@@ -55456,7 +55537,7 @@ function drawHUD(){
     // émotes au-dessus des 4x4
     for(const o of cars){if(o.emoteT>0&&o.emote){_v.copy(o.pos);_v.y+=4.8;const pp=proj(_v,p.cam,r);if(pp){const sc=Math.min(1,(3.5-o.emoteT)*6)*(o===car?1.1:1);hx.font=`${Math.round(40*sc)}px serif`;hx.textAlign='center';hx.textBaseline='middle';hx.beginPath();hx.arc(pp.x,pp.y-20,30*sc,0,7);hx.fillStyle='#fff';hx.fill();hx.lineWidth=3;hx.strokeStyle='#1d2433';hx.stroke();hx.fillStyle='#000';hx.fillText(o.emote,pp.x,pp.y-18);}}}
     // repères
-    const pings=[];for(const q of players)if(q.ping.visible)pings.push([q.ping,q.car]);if(Net.remote&&Net.remote.pingObj&&Net.remote.pingObj.visible)pings.push([Net.remote.pingObj,Net.remote]);
+    const pings=[];for(const q of players)if(q.ping.visible)pings.push([q.ping,q.car]);for(const r of Net.remotes.values())if(r.pingObj&&r.pingObj.visible)pings.push([r.pingObj,r]);
     for(const [g,owner] of pings){_v.copy(g.position);_v.y+=8;const pp=proj(_v,p.cam,r),d=Math.round(Math.hypot(g.position.x-car.pos.x,g.position.z-car.pos.z));if(pp&&pp.on){hx.font='800 14px "Trebuchet MS",sans-serif';hx.textAlign='center';hx.fillStyle='#fff';hx.strokeStyle='#1d2433';hx.lineWidth=4;hx.strokeText(`📍 ${d} m`,pp.x,pp.y);hx.fillText(`📍 ${d} m`,pp.x,pp.y);}else edgeArrow(p,r,g.position,css(owner.color),`📍 ${d} m`);}
     // défi
     if(Race.active){
@@ -55471,12 +55552,13 @@ function drawHUD(){
   }
   if(players.length===2){hx.fillStyle='#1d2433';hx.fillRect(W/2-2,0,4,Hh);}
   if(ADMIN.fps){const c=players[0].car;hx.font='800 12px monospace';hx.textAlign='left';hx.textBaseline='top';hx.fillStyle='rgba(0,0,0,.6)';hx.fillRect(W/2-114,Hh-74,228,64);hx.fillStyle='#80ed99';
-    [`FPS ${fpsAcc.toFixed(0)}`,`pos ${c.pos.x.toFixed(0)} ${c.pos.y.toFixed(1)} ${c.pos.z.toFixed(0)}`,`${SURF[c.surf].name} · roues au sol ${c.nC}/4`,`réseau ${Net.connected?'connecté':'—'} · voix ${Net.hearing?'ok':'—'}`].forEach((t,i)=>hx.fillText(t,W/2-106,Hh-68+i*14));}
-  if(Net.connected){if(Net.talking)pill(16,Hh-150,'🎙️ Tu parles…','#e63946','#fff',15);if(Net.remoteTalking&&Net.remote)pill(16,Hh-190,`📡 ${Net.remote.name} parle`,'#2ec4b6','#fff',15);}
+    [`FPS ${fpsAcc.toFixed(0)}`,`pos ${c.pos.x.toFixed(0)} ${c.pos.y.toFixed(1)} ${c.pos.z.toFixed(0)}`,`${SURF[c.surf].name} · roues au sol ${c.nC}/4`,`réseau ${Net.connected?(Net.remotes.size+1)+' joueurs':'—'} · voix ${Net.calls.size}`].forEach((t,i)=>hx.fillText(t,W/2-106,Hh-68+i*14));}
+  if(Net.connected){if(Net.talking)pill(16,Hh-150,'🎙️ Tu parles…','#e63946','#fff',15);{let k=0;for(const r of Net.remotes.values())if(r.talking&&r.group===Net.group)pill(16,Hh-190-(k++)*38,`📡 ${r.name} parle`,'#2ec4b6','#fff',15);}}
 }
 const txt=(t,x,y,size,fill,align='center',w=5)=>{hx.font=`900 ${size}px "Trebuchet MS",sans-serif`;hx.textAlign=align;hx.textBaseline='middle';hx.lineJoin='round';hx.lineWidth=w;hx.strokeStyle='#1d2433';hx.strokeText(t,x,y);hx.fillStyle=fill;hx.fillText(t,x,y);};
 function drawDash(p,r,sm){
   if(TOUCH.on&&!p.onFoot)return;
+  if(document.body.classList.contains('cockpit'))return;
   const c=p.car,x0=r.x+16+178*sm,y0=r.y+r.h-16-88*sm,k=p.keys==='p2';
   if(p.onFoot){const t=footTarget(p),E=k?'K':'E';
     const msg=t?(t.k==='chock'?`${E} : ${(c.chocks||[]).some(q=>q.i===t.i)?'retirer':'poser'} une cale 🧱`:`${E} : ${c.park?'desserrer':'serrer'} le frein à main 🅿️ · ${k?'Retour':'Tab'} : remonter`):`🚶 À pied · pousse le 4x4 en marchant dedans · ${c.park?'🅿️ frein serré':'frein desserré'}${chocked(c)?' · 🧱 calé':''}`;
@@ -55519,7 +55601,7 @@ function drawProgress(p,r,sm,ty){
     rr(x,y,w,28,12);hx.fillStyle='#fff';hx.fill();hx.lineWidth=3;hx.strokeStyle='#1d2433';hx.stroke();hx.beginPath();hx.moveTo(pp.x-8,y+28);hx.lineTo(pp.x,y+40);hx.lineTo(pp.x+8,y+28);hx.fillStyle='#fff';hx.fill();
     hx.fillStyle='#1d2433';hx.textAlign='center';hx.textBaseline='middle';hx.fillText(t,pp.x,y+15);}}}
   // vue intérieure : petit rappel
-  if(p.view===2||p.view===3){pill(r.x+r.w/2-60,r.y+r.h-44,`🎥 ${VIEWS[p.view]}`,'rgba(29,36,51,.8)','#fff',12);}
+  if(p.view===3){pill(r.x+r.w/2-60,r.y+r.h-44,`🎥 ${VIEWS[p.view]}`,'rgba(29,36,51,.8)','#fff',12);}
   // roue d'émotes
   if(p.wheelOpen){
     const cx=r.x+r.w/2,cy=r.y+r.h/2,R=Math.min(130,r.w*0.22),n=EMOTES.length;
@@ -55543,7 +55625,8 @@ function edgeArrow(p,r,pos,color,label){
 }
 function drawMinimap(p,r,sm){
   if(!mapImg)return;
-  const R=TOUCH.on?50:Math.max(58,78*sm),cx=TOUCH.on?r.x+r.w-R-14:r.x+r.w-R-16,cy=TOUCH.on?r.y+R+60:r.y+r.h-R-16,car=p.car,range=170,scale=R/range;
+  const top=TOUCH.on||(document.body.classList.contains('cockpit')&&p===players[0]);
+  const R=TOUCH.on?50:Math.max(58,78*sm),cx=top?r.x+r.w-R-14:r.x+r.w-R-16,cy=top?r.y+R+60:r.y+r.h-R-16,car=p.car,range=170,scale=R/range;
   const toMap=(wx,wz)=>[(wx-car.pos.x)*scale,(wz-car.pos.z)*scale];
   const rot=-Math.PI/2-Math.atan2(Math.cos(p.camYaw),Math.sin(p.camYaw));
   hx.save();hx.translate(cx,cy);hx.beginPath();hx.arc(0,0,R,0,7);hx.fillStyle='#3fa7e0';hx.fill();hx.save();hx.clip();hx.rotate(rot);
@@ -55551,7 +55634,7 @@ function drawMinimap(p,r,sm){
   hx.drawImage(mapImg,(-HALF-car.pos.x)*scale,(-HALF-car.pos.z)*scale,WORLD*scale,WORLD*scale);
   {const [x0,y0]=toMap(-CORR.x1,CORR.zEnd),[x1,y1]=toMap(CORR.x1,CORR.zStart);hx.fillStyle='#5aa86a';hx.fillRect(x0,y0,x1-x0,y1-y0);const [a0]=toMap(-CORR.wall,0),[a1]=toMap(CORR.wall,0);hx.fillStyle='#7cc35a';hx.fillRect(a0,y0,a1-a0,y1-y0);}
   BALISE_POS.forEach((b,i)=>{if(collected.has(i))return;const [x,y]=toMap(b.x,b.z);hx.beginPath();hx.arc(x,y,5,0,7);hx.fillStyle='#ffd23f';hx.fill();hx.lineWidth=2;hx.strokeStyle='#1d2433';hx.stroke();});
-  const pins=[];for(const q of players)if(q.ping.visible)pins.push([q.ping.position,q.car.color]);if(Net.remote&&Net.remote.pingObj&&Net.remote.pingObj.visible)pins.push([Net.remote.pingObj.position,Net.remote.color]);
+  const pins=[];for(const q of players)if(q.ping.visible)pins.push([q.ping.position,q.car.color]);for(const r of Net.remotes.values())if(r.pingObj&&r.pingObj.visible)pins.push([r.pingObj.position,r.color]);
   for(const [pp,c] of pins){const [x,y]=toMap(pp.x,pp.z);hx.beginPath();hx.arc(x,y,6,0,7);hx.fillStyle=css(c);hx.fill();hx.strokeStyle='#fff';hx.lineWidth=2;hx.stroke();}
   {const [x,y]=toMap(GARAGE.x,GARAGE.z);hx.beginPath();hx.arc(x,y,9,0,7);hx.fillStyle='#ffd23f';hx.fill();hx.lineWidth=2;hx.strokeStyle='#1d2433';hx.stroke();hx.save();hx.rotate(-rot);hx.font='11px serif';hx.textAlign='center';hx.textBaseline='middle';hx.fillText('🔧',0,0);hx.restore();}
   if(GPS){const [x,y]=toMap(GPS.x,GPS.z);hx.beginPath();hx.arc(x,y,7,0,7);hx.fillStyle='#9b5de5';hx.fill();hx.lineWidth=2;hx.strokeStyle='#fff';hx.stroke();}
@@ -56348,6 +56431,97 @@ document.addEventListener('visibilitychange',()=>{if(!document.hidden)keepAwake(
 // vibrations au téléphone (chocs, atterrissages)
 function buzz(ms){if(TOUCH.on&&navigator.vibrate)try{navigator.vibrate(ms);}catch(e){}}
 
+/* ---------- collisions entre 4x4 : vraies boîtes (aucun chevauchement) + poussée en ligne ---------- */
+function carBox(c){const M=MODELS[c.model]||MODELS.baroudeur;return{hw:c.tr+0.26*(c.wheelScale||1),hl:Math.max(M.front,-M.rear)+0.08};}
+function collideCars(){
+  for(let i=0;i<cars.length;i++)for(let j=i+1;j<cars.length;j++){
+    const a=cars[i],b=cars[j];if(a.remote&&b.remote)continue;
+    const dx=b.pos.x-a.pos.x,dz=b.pos.z-a.pos.z;if(dx*dx+dz*dz>81||Math.abs(a.pos.y-b.pos.y)>2.4)continue;
+    const A=carBox(a),B=carBox(b),sa=Math.sin(a.yaw),ca=Math.cos(a.yaw),sb=Math.sin(b.yaw),cb=Math.cos(b.yaw);
+    const axes=[[sa,ca],[ca,-sa],[sb,cb],[cb,-sb]];
+    let minO=1e9,nx=0,nz=0,sep=false;
+    for(const [ax,az] of axes){
+      const ra=A.hl*Math.abs(ax*sa+az*ca)+A.hw*Math.abs(ax*ca-az*sa);
+      const rb=B.hl*Math.abs(ax*sb+az*cb)+B.hw*Math.abs(ax*cb-az*sb);
+      const d=dx*ax+dz*az,o=ra+rb-Math.abs(d);
+      if(o<=0){sep=true;break;}
+      if(o<minO){minO=o;const s=d<0?-1:1;nx=ax*s;nz=az*s;}
+    }
+    if(sep)continue;
+    const aL=!a.remote,bL=!b.remote;
+    // on sépare complètement les deux 4x4
+    if(aL&&bL){a.pos.x-=nx*minO*0.5;a.pos.z-=nz*minO*0.5;b.pos.x+=nx*minO*0.5;b.pos.z+=nz*minO*0.5;}
+    else if(aL){a.pos.x-=nx*minO;a.pos.z-=nz*minO;}else{b.pos.x+=nx*minO;b.pos.z+=nz*minO;}
+    const rv=(b.vx-a.vx)*nx+(b.vz-a.vz)*nz;
+    if(rv<0){
+      const jj=-rv*0.6;   // choc un peu amorti, masses égales
+      if(aL){a.vx-=nx*jj;a.vz-=nz*jj;}if(bL){b.vx+=nx*jj;b.vz+=nz*jj;}
+      if(-rv>3){const L=aL?a:b;L.impact=Math.max(L.impact,-rv*0.8);}
+      // un joueur en ligne : on lui envoie la poussée (son 4x4 bouge vraiment chez lui)
+      const Rm=aL?b:a,sg=aL?1:-1;
+      if(Rm.remote&&Rm.netId){Rm._bx=(Rm._bx||0)+nx*jj*sg;Rm._bz=(Rm._bz||0)+nz*jj*sg;}
+    }
+  }
+  const now=performance.now();
+  for(const c of cars)if(c.remote&&(c._bx||c._bz)&&(!c._bumpT||now-c._bumpT>50)){
+    c._bumpT=now;netSend({t:'bump',to:c.netId,ix:+c._bx.toFixed(2),iz:+c._bz.toFixed(2)});c._bx=c._bz=0;}
+}
+
+/* =========================================================
+   Tableau de bord interactif (vue intérieure) : fin, en bas, cliquable
+   ========================================================= */
+const CD_BTNS=[
+  ['lights','💡','Phares','F'],['low','🐢','4L','7'],['lock','🔒','Blocage','8'],['hazard','⚠️','Warnings','9'],['park','🅿️','Frein','P'],
+  ['door','🚪','Sortir','0'],['horn','📯','Klaxon','E'],['map','🗺️','Carte','M'],['cb','📻','Radio CB','V'],['gps','🧭','GPS ✖',''],['music','🎵','Musique','N'],
+];
+function setupCockpitDash(){
+  const box=document.getElementById('cdBtns');
+  box.innerHTML=CD_BTNS.map(b=>`<button data-a="${b[0]}" title="${b[2]}${b[3]?' ('+b[3]+')':''}"><span>${b[1]}</span><small>${b[2]}</small></button>`).join('');
+  box.querySelectorAll('button').forEach(btn=>{
+    const a=btn.dataset.a;
+    if(a==='horn'){btn.addEventListener('pointerdown',e=>{e.preventDefault();const p=players[0];if(p)hornDown(p);});
+      const up=()=>{const p=players[0];if(p)p.car.horn=false;};btn.addEventListener('pointerup',up);btn.addEventListener('pointerleave',up);return;}
+    btn.addEventListener('click',e=>{e.preventDefault();initAudio();const p=players[0];if(!p)return;const c=p.car;
+      if(a==='park'){c.park=!c.park;blip(c.park?[220,160]:[160,240],0.08,'square',0.07,0.05);toast(c.park?'🅿️ Frein à main serré':'🅿️ Frein à main desserré');}
+      else if(a==='map')toggleBigMap();
+      else if(a==='cb')toggleMic();
+      else if(a==='gps'){setGPS(null);toast('🧭 GPS effacé');}
+      else if(a==='music'){setStation(Radio.st+1);toast(`🎵 ${STATIONS[Radio.st].name}`);}
+      else doAction(p,a);
+      btn.blur();});
+  });
+}
+let cdT=0;
+function cockpitDashTick(dt){
+  const el=document.getElementById('cdash');
+  const p=players[0],show=started&&!paused&&players.length===1&&p&&p.view===2&&!p.onFoot&&!p.footAnim&&!TOUCH.on;
+  if(el.hidden===show)el.hidden=!show;document.body.classList.toggle('cockpit',show);
+  if(!show)return;
+  cdT-=dt;if(cdT>0)return;cdT=0.08;
+  const c=p.car,on={lights:c.lightMode>0,low:c.low,lock:c.lock,hazard:c.hazard,park:c.park,door:(c.doorOpen||0)>0.3,horn:c.horn,map:bigMapOpen,cb:!!(Net.stream&&Net.talking),gps:!!GPS,music:!STATIONS[Radio.st].off};
+  document.querySelectorAll('#cdBtns button').forEach(b=>{b.classList.toggle('on',!!on[b.dataset.a]);if(b.dataset.a==='lights')b.querySelector('span').textContent=c.lightMode===2?'🔆':'💡';});
+  // compteur à aiguille
+  const sp=Math.abs(c.vf)*3.6,cv=document.getElementById('cdSpeed'),x=cv.getContext('2d'),W=cv.width,H=cv.height,cx=W/2,cy=H*0.86,R=H*0.72;
+  x.clearRect(0,0,W,H);x.lineWidth=10;x.strokeStyle='rgba(255,255,255,.15)';x.beginPath();x.arc(cx,cy,R,Math.PI,0);x.stroke();
+  const f=Math.min(1,sp/140);x.strokeStyle=f>0.8?'#e63946':'#ffd23f';x.beginPath();x.arc(cx,cy,R,Math.PI,Math.PI+Math.PI*f);x.stroke();
+  for(let k=0;k<=7;k++){const a=Math.PI+Math.PI*k/7;x.strokeStyle='rgba(255,255,255,.6)';x.lineWidth=2;x.beginPath();x.moveTo(cx+Math.cos(a)*(R-14),cy+Math.sin(a)*(R-14));x.lineTo(cx+Math.cos(a)*(R-6),cy+Math.sin(a)*(R-6));x.stroke();}
+  const na=Math.PI+Math.PI*f;x.strokeStyle='#ff8a3d';x.lineWidth=4;x.beginPath();x.moveTo(cx,cy);x.lineTo(cx+Math.cos(na)*(R-10),cy+Math.sin(na)*(R-10));x.stroke();
+  x.fillStyle='#fff';x.font='900 30px "Trebuchet MS",sans-serif';x.textAlign='center';x.textBaseline='alphabetic';x.fillText(Math.round(sp),cx,cy-14);
+  x.font='800 11px "Trebuchet MS",sans-serif';x.fillStyle='rgba(255,255,255,.7)';const span=c.low?4:8.5,gear=Math.min(5,Math.floor(Math.abs(c.vf)/span));
+  x.fillText(`km/h · ${c.low?'4L':'4H'} · ${c.vf<-0.5?'R':gear+1}`,cx,cy+2);
+  // inclinomètre : tangage (avant/arrière) et dévers (côté)
+  const ci=document.getElementById('cdIncl'),y=ci.getContext('2d'),w2=ci.width,h2=ci.height;y.clearRect(0,0,w2,h2);
+  const pd=Math.round(-c.pitch*57.3),rd=Math.round(c.roll*57.3),danger=Math.abs(rd)>28||Math.abs(pd)>32;
+  const drawIcon=(ox,ang,side)=>{y.save();y.translate(ox,h2*0.5);y.rotate(ang);y.fillStyle=danger?'#e63946':'#2ec4b6';y.strokeStyle='#fff';y.lineWidth=2;
+    if(side){y.fillRect(-26,-8,52,14);y.strokeRect(-26,-8,52,14);y.fillRect(-14,-18,26,10);y.beginPath();y.arc(-15,8,6,0,7);y.arc(15,8,6,0,7);y.fill();}
+    else{y.fillRect(-18,-10,36,16);y.strokeRect(-18,-10,36,16);y.fillRect(-12,-19,24,9);y.beginPath();y.arc(-12,8,6,0,7);y.arc(12,8,6,0,7);y.fill();}
+    y.restore();y.strokeStyle='rgba(255,255,255,.25)';y.beginPath();y.moveTo(ox-34,h2*0.5+14);y.lineTo(ox+34,h2*0.5+14);y.stroke();};
+  drawIcon(w2*0.27,c.pitch,true);drawIcon(w2*0.73,-c.roll,false);
+  y.fillStyle=danger?'#ff6b6b':'#fff';y.font='900 13px "Trebuchet MS",sans-serif';y.textAlign='center';y.fillText(`${pd}°`,w2*0.27,h2*0.92);y.fillText(`${rd}°`,w2*0.73,h2*0.92);
+  y.font='800 9px "Trebuchet MS",sans-serif';y.fillStyle='rgba(255,255,255,.7)';y.fillText('PENTE',w2*0.27,h2*0.14);y.fillText('DÉVERS',w2*0.73,h2*0.14);
+  if(danger&&!c._tipWarn){c._tipWarn=true;toast('⚠️ Ça penche beaucoup : attention à ne pas basculer !');setTimeout(()=>{c._tipWarn=false;},6000);}
+}
+
 /* =========================================================
    Boucle principale
    ========================================================= */
@@ -56379,9 +56553,9 @@ function updateCam(p,dt){
     if(cam.near!==0.05){cam.near=0.05;cam.updateProjectionMatrix();}
     _v.set(0.45,2.16-0.9,-0.36);car.tilt.localToWorld(_v);cam.position.copy(_v);
     const sh=p.shake*0.15;cam.position.x+=(Math.random()-0.5)*sh;cam.position.y+=(Math.random()-0.5)*sh;
-    car.tilt.getWorldQuaternion(_q);_e.set(-p.op*0.9,p.oy,0,'YXZ');_ql.setFromEuler(_e);
+    car.tilt.getWorldQuaternion(_q);_e.set(-p.op*0.9-0.1,p.oy,0,'YXZ');_ql.setFromEuler(_e);
     cam.quaternion.copy(_q).multiply(_qf).multiply(_ql);
-    const fov=72+Math.min(8,sp*0.2);if(Math.abs(cam.fov-fov)>0.05){cam.fov+=(fov-cam.fov)*Math.min(1,dt*3);cam.updateProjectionMatrix();}
+    const fov=76+Math.min(8,sp*0.2);if(Math.abs(cam.fov-fov)>0.05){cam.fov+=(fov-cam.fov)*Math.min(1,dt*3);cam.updateProjectionMatrix();}
     p.camPos.copy(cam.position);
     return;
   }
@@ -56429,14 +56603,8 @@ function frame(now){
     while(acc>=h&&n<12){
       for(const p of players)p.car.step(h);
       for(const c of NPCS)if(!c.remote)c.step(h);
-      // collision entre 4x4
-      for(let i=0;i<cars.length;i++)for(let j=i+1;j<cars.length;j++){
-        const a=cars[i],b=cars[j],dx=b.pos.x-a.pos.x,dz=b.pos.z-a.pos.z,d=Math.hypot(dx,dz);
-        if(d<3.3&&d>0.01&&Math.abs(a.pos.y-b.pos.y)<2){const ux=dx/d,uz=dz/d,o=3.3-d;
-          const aL=!a.remote,bL=!b.remote,sh=aL&&bL?0.5:1;
-          if(aL){a.pos.x-=ux*o*sh;a.pos.z-=uz*o*sh;}if(bL){b.pos.x+=ux*o*sh;b.pos.z+=uz*o*sh;}
-          const rv=(b.vx-a.vx)*ux+(b.vz-a.vz)*uz;if(rv<0){const im=-rv*0.8;if(aL){a.vx-=ux*im*(bL?0.5:1);a.vz-=uz*im*(bL?0.5:1);}if(bL){b.vx+=ux*im*(aL?0.5:1);b.vz+=uz*im*(aL?0.5:1);}if(im>3){(aL?a:b).impact=im;}}}
-      }
+      // collision entre 4x4 (boîtes)
+      collideCars();
       // treuil
       if(Winch.on&&Winch.anchor){
         const a=Winch.car,an=Winch.anchor;if(!a){Winch.on=false;}else if(!a.remote){a.helpT=0.4;const dx=an.x-a.pos.x,dz=an.z-a.pos.z,d=Math.hypot(dx,dz);
@@ -56445,7 +56613,7 @@ function frame(now){
           else if(d>Winch.len){const ux=dx/d,uz=dz/d,ex=d-Winch.len,rv=-(a.vx*ux+a.vz*uz),f=Math.min(28,ex*16+Math.max(0,rv)*4)*h;a.vx+=ux*f;a.vz+=uz*f;a.helpT=0.4;}}
       }
       else if(Winch.on&&cars.length>1){
-        const a=players[0].car,b=partnerCar(a);if(!b){Winch.on=false;}else{a.helpT=0.4;b.helpT=0.4;const dx=b.pos.x-a.pos.x,dz=b.pos.z-a.pos.z,d=Math.hypot(dx,dz);
+        const a=players[0].car,b=Winch.other||partnerCar(a);if(!b){Winch.on=false;}else{a.helpT=0.4;b.helpT=0.4;const dx=b.pos.x-a.pos.x,dz=b.pos.z-a.pos.z,d=Math.hypot(dx,dz);
         Winch.len=Math.max(7,Winch.len-1.2*h);
         if(d>Winch.len+15){Winch.on=false;toast('💥 Le câble du treuil a lâché !');netSend({t:'winch',on:false});}
         else if(d>Winch.len){const ux=dx/d,uz=dz/d,ex=d-Winch.len,rv=(b.vx-a.vx)*ux+(b.vz-a.vz)*uz,f=Math.min(26,ex*14+Math.max(0,rv)*3)*h;
@@ -56467,10 +56635,10 @@ function frame(now){
     }
     if(Winch.on)Winch.t=(Winch.t||0)+dt;
     campFX(dt);
-    if(Net.remote&&Net.remote.ch&&Net.remote.ch.g.visible)Net.remote.ch.pose(['idle','walk','run','push'][Net.remote.chState||0],dt);
+    for(const r of Net.remotes.values())if(r.ch&&r.ch.g.visible)r.ch.pose(['idle','walk','run','push'][r.chState||0],dt);
     for(const c of NPCS)if(c.remote)c.updateRemote(dt);
     npcNet(dt);
-    if(Net.remote){Net.remote.updateRemote(dt);if(Net.remote.pingObj&&Net.remote.pingT>0){Net.remote.pingT-=dt;if(Net.remote.pingT<=0)Net.remote.pingObj.visible=false;}}
+    for(const r of Net.remotes.values()){r.updateRemote(dt);if(r.pingObj&&r.pingT>0){r.pingT-=dt;if(r.pingT<=0)r.pingObj.visible=false;}}
     if(Race.active){
       const left=(Race.start-Date.now())/1000;
       if(left>0&&Math.ceil(left)!==Race.beeps&&left<3.05){Race.beeps=Math.ceil(left);blip([440],0.15,'square',0.12);}
@@ -56484,9 +56652,9 @@ function frame(now){
   cars.forEach((c,i)=>{c.updateMesh(dt);if(!paused)carEffects(c,dt,players.length===2?(i===0?-0.5:0.5):0);});
   if(!paused){FX.update(dt);updateCows(dt);}TRK.flush();
   // corde du treuil
-  rope.visible=Winch.on&&!!(Winch.anchor?Winch.car:(players[0]&&partnerCar(players[0].car)));
+  rope.visible=Winch.on&&!!(Winch.anchor?Winch.car:(players[0]&&(Winch.other||partnerCar(players[0].car))));
   if(rope.visible){
-    const a=Winch.anchor?Winch.car:players[0].car,b=Winch.anchor?{pos:new THREE.Vector3(Winch.anchor.x,Winch.anchor.y,Winch.anchor.z),yaw:0,anchor:true}:partnerCar(a),hook=(c,o)=>{const back=(Math.sin(c.yaw)*(o.pos.x-c.pos.x)+Math.cos(c.yaw)*(o.pos.z-c.pos.z))<0;_v.set(0,0.3-0.9+0.6,back?-2.4:2.45);c.tilt.localToWorld(_v);return _v.clone();};
+    const a=Winch.anchor?Winch.car:players[0].car,b=Winch.anchor?{pos:new THREE.Vector3(Winch.anchor.x,Winch.anchor.y,Winch.anchor.z),yaw:0,anchor:true}:(Winch.other||partnerCar(a)),hook=(c,o)=>{const back=(Math.sin(c.yaw)*(o.pos.x-c.pos.x)+Math.cos(c.yaw)*(o.pos.z-c.pos.z))<0;_v.set(0,0.3-0.9+0.6,back?-2.4:2.45);c.tilt.localToWorld(_v);return _v.clone();};
     const A=hook(a,b),B=b.anchor?new THREE.Vector3(b.pos.x,b.pos.y+1.2,b.pos.z):hook(b,a),d=A.distanceTo(B),sag=Math.max(0.2,(Winch.len-d)*0.4+0.3),M=new THREE.Matrix4(),q=new THREE.Quaternion(),up=new THREE.Vector3(0,1,0);
     let prev=A.clone();
     for(let i=1;i<=24;i++){const t=i/24,pt=A.clone().lerp(B,t);pt.y-=Math.sin(Math.PI*t)*sag;const mid=prev.clone().add(pt).multiplyScalar(0.5),dir=pt.clone().sub(prev),len=dir.length();q.setFromUnitVectors(up,dir.normalize());M.compose(mid,q,new THREE.Vector3(1,len,1));rope.setMatrixAt(i-1,M);prev=pt;}
@@ -56508,7 +56676,7 @@ function frame(now){
   }else players[0].rect={x:0,y:0,w:innerWidth,h:innerHeight};
   for(const p of players){updateCam(p,dt);renderView(p.cam,p.rect,p.car.pos);}
   drawHUD();photoAfterRender();
-  campHUD();tutoTick();refreshTouch();if(bigMapOpen&&(++bigMapTick%8===0))drawBigMap();
+  campHUD();tutoTick();refreshTouch();cockpitDashTick(dt);if(bigMapOpen&&(++bigMapTick%8===0))drawBigMap();
   fpsAcc=fpsAcc*0.95+(1/Math.max(0.001,(now-fpsLast)/1000))*0.05;fpsLast=now;
 }
 
@@ -56566,12 +56734,16 @@ function startGame(m){
 function cleanup(){
   clearNPCs();
   for(const c of cars){c.dispose();if(c.ch)scene.remove(c.ch.g);}for(const p of players){scene.remove(p.ping);if(p.ch)scene.remove(p.ch.g);}cars=[];players=[];
-  if(Net.peer){try{Net.peer.destroy();}catch(e){}}Object.assign(Net,{peer:null,conn:null,connected:false,remote:null,call:null,talking:false,remoteTalking:false,ptt:false,hearing:false,meMeter:null,himMeter:null});
+  for(const id of [...Net.calls.keys()])endCall(id);
+  for(const r of Net.remotes.values()){r.dispose();if(r.ch)scene.remove(r.ch.g);if(r.pingObj)scene.remove(r.pingObj);}Net.remotes.clear();
+  for(const c of Net.conns.values())try{c.close();}catch(e){}Net.conns.clear();
+  if(Net.peer){try{Net.peer.destroy();}catch(e){}}Object.assign(Net,{peer:null,conn:null,connected:false,host:false,code:'',myId:'',talking:false,ptt:false,group:1,inviteUrl:''});
   if(Net.stream){Net.stream.getTracks().forEach(t=>t.stop());Net.stream=null;}
   Winch.on=false;Race.active=false;raceFlag.visible=false;lobby(null);
 }
 function togglePause(){
   if(!started)return;paused=!paused;if(paused)renderHelp();
+  if(paused){const gr=document.getElementById('pGroupRow');gr.style.display=(Net.peer&&players.length===1)?'block':'none';renderGroups();}
   if(paused){const pc=document.getElementById('pCode');pc.hidden=!Net.code||!Net.peer;document.getElementById('pCodeV').textContent=Net.code||'';}document.getElementById('pause').hidden=!paused;if(paused)refreshGarage();else document.getElementById('admin').hidden=true;cgGameplay(!paused);
   if(AC){if(paused)radioBus.gain.setTargetAtTime(Radio.vol*0.2,AC.currentTime,0.1);else radioBus.gain.setTargetAtTime(Radio.vol*0.55,AC.currentTime,0.1);}
 }
@@ -56593,6 +56765,7 @@ document.getElementById('bSolo').onclick=()=>askNick('solo');
 document.getElementById('bHost').onclick=()=>askNick('host');
 document.getElementById('bJoin').onclick=()=>{const v=document.getElementById('jCode').value.trim();if(v.length!==4){toast('Entre le code à 4 caractères de ton pote');return;}askNick('join');};
 document.getElementById('bResume').onclick=()=>togglePause();
+setupCockpitDash();
 document.getElementById('bLang').textContent=LANG==='fr'?'🇬🇧 English':'🇫🇷 Français';document.getElementById('bLang').onclick=()=>setLang(LANG==='fr'?'en':'fr');
 document.getElementById('bInstall').onclick=doInstall;document.getElementById('bShare').onclick=shareGame;document.getElementById('bFull').onclick=toggleFullscreen;
 document.getElementById('bPhoto').onclick=()=>{togglePause();setTimeout(takePhoto,150);};document.getElementById('bFull2').onclick=toggleFullscreen;document.getElementById('bShare2').onclick=shareGame;
